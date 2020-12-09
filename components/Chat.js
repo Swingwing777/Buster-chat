@@ -1,7 +1,11 @@
 // Chat.js
 
 import React from 'react';
-import { View, Text } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View
+} from 'react-native';
 
 export default class Chat extends React.Component {
   render() {
@@ -21,3 +25,12 @@ export default class Chat extends React.Component {
     )
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

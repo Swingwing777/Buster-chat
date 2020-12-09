@@ -1,10 +1,13 @@
 // Start.js is the Start/Home screen for the application
 
 import React from 'react';
+
 import {
-  View,
   Button,
-  TextInput
+  ImageBackground,
+  StyleSheet,
+  TextInput,
+  View
 } from 'react-native';
 
 export default class Start extends React.Component {
@@ -19,27 +22,37 @@ export default class Start extends React.Component {
   render() {
 
     return (
-      <View style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <TextInput
-          onChangeText={(name) => this.setState({ name })}
-          value={this.state.name}
-          placeholder='Your Name'
-        />
+      <ImageBackground
+        style={{ flex: 1 }}
+        source={require('../assets/Background Image.png')}
+      >
+        <View style={styles.container}>
+          <TextInput
+            onChangeText={(name) => this.setState({ name })}
+            value={this.state.name}
+            placeholder='Your Name'
+          />
 
-        <Button
-          title="Start Chatting"
-          onPress={
-            () => this.props.navigation.navigate(
-              'Chat',
-              { name: this.state.name }
-            )
-          }
-        />
-      </View>
+          <Button
+            title="Start Chatting"
+            onPress={
+              () => this.props.navigation.navigate(
+                'Chat',
+                { name: this.state.name }
+              )
+            }
+          />
+        </View>
+      </ImageBackground>
     )
   }
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});
