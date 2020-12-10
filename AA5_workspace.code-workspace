@@ -2,6 +2,9 @@
   "folders": [
     {
       "path": "."
+    },
+    {
+      "path": "..\\AA4_buster-citymeet"
     }
   ],
   "settings": {}
