@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
     opacity: 1,
     marginLeft: '6%',
     borderColor: '#000',
+    marginTop: '5%',
   },
   buttonRow: {
     width: '80%',
@@ -156,8 +157,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     paddingLeft: 16,
+    marginBottom: '2%'
   },
   buttonColor: {
+    position: 'relative',
     width: 40,
     height: 40,
     borderRadius: 20,

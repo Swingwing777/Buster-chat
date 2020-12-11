@@ -39,25 +39,17 @@ export default class Chat extends Component {
     // Use params passed by navigation.navigate to 'Chat'
 
     let { backGround } = this.props.route.params;
-    // const styleBackground = {
-    //   backgroundColor: this.state.backGround
-    // };
 
-    // // Set a default username if the user does not enter one
-    // if (!name || name === '') name = 'User';
-
-    // // Displays username on the navbar in place of the title
-    // this.props.navigation.setOptions({ title: name });
-    //const backgroundSet = this.state.backGround;
 
     return (
       <View
-        style={[styles.container, { backGround }]}
+        style={[styles.chatBackground, { backGround }]}
       >
 
         {/* To be changed to a combination of previous texts and a textInput */}
         <Text style={styles.userChat}>Hello</Text>
         <Text style={styles.friendChat}>Hello {this.state.name}</Text>
+        <Text style={styles.userChat}>My colour choice is: `{this.state.backGround}`</Text>
       </View>
     )
   }
@@ -65,7 +57,7 @@ export default class Chat extends Component {
 
 
 const styles = StyleSheet.create({
-  container: {
+  chatBackground: {
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'flex-start',
