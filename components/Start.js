@@ -3,7 +3,6 @@
 import React, { Component } from 'react';
 
 import {
-  Button,
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
@@ -28,6 +27,7 @@ export default class Start extends Component {
     /**
    * TextInput sets the user's name
    * TouchableOpacity elements set the background color for the next screen
+   * and allow bespoke styling
    */
 
     return (
@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   chatButtonText: {
-    //width: '88%',
     fontSize: 16,
     fontWeight: '600',
     color: '#FFF',

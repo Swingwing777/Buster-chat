@@ -16,6 +16,9 @@ export default class Chat extends Component {
     };
   };
 
+  /* Separate init() method to keep update functions outside 
+  render method - to prevent React Warning
+  */
 
   init() {
     let { name, backGround } = this.props.route.params;
@@ -37,6 +40,7 @@ export default class Chat extends Component {
 
   render() {
 
+    // backgroundColor as selected by the user on Start screen
     let backGround = this.props.route.params.backGround;
 
     return (
