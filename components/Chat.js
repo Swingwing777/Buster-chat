@@ -36,20 +36,21 @@ export default class Chat extends Component {
   }
 
   render() {
-    // Use params passed by navigation.navigate to 'Chat'
 
-    let { backGround } = this.props.route.params;
-
+    let backGround = this.props.route.params.backGround;
 
     return (
       <View
-        style={[styles.chatBackground, { backGround }]}
+        style={{
+          flex: 1,
+          backgroundColor: backGround
+        }}
       >
 
         {/* To be changed to a combination of previous texts and a textInput */}
         <Text style={styles.userChat}>Hello</Text>
         <Text style={styles.friendChat}>Hello {this.state.name}</Text>
-        <Text style={styles.userChat}>My colour choice is: `{this.state.backGround}`</Text>
+        <Text style={styles.userChat}>My colour choice is: {backGround}</Text>
       </View>
     )
   }

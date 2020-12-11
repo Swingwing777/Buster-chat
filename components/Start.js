@@ -87,8 +87,10 @@ export default class Start extends Component {
               onPress={
                 () => this.props.navigation.navigate(
                   'Chat',
-                  { name: this.state.name },
-                  { backGround: this.state.backGround }
+                  {
+                    name: this.state.name,
+                    backGround: this.state.backGround
+                  }
                 )
               }
             >
