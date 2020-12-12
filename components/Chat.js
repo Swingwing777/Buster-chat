@@ -1,6 +1,8 @@
 // Chat.js
 
 import React, { Component } from 'react';
+import { GiftedChat } from 'react-native-gifted-chat'
+
 import {
   StyleSheet,
   Text,
@@ -12,7 +14,8 @@ export default class Chat extends Component {
     super();
 
     this.state = {
-      backGround: ''
+      backGround: '',
+      messages: [],
     };
   };
 
@@ -21,6 +24,7 @@ export default class Chat extends Component {
   */
 
   init() {
+    // Variables declared from the passed-in props 
     let { name, backGround } = this.props.route.params;
 
     // Set a default username if the user does not enter one
@@ -35,13 +39,36 @@ export default class Chat extends Component {
   }
 
   componentDidMount() {
-    this.init();   // here is the right place to change header title or other properties
+    this.init();
+
+    // This sets a static messages object in the required format 
+    this.setState({
+      messages: [
+        {
+          _id: 1,
+          text: 'Hello developer',
+          createdAt: new Date(),
+          user: {
+            _id: 2,
+            name: 'React Native',
+            avatar: 'https://placeimg.com/140/140/any',
+          },
+        },
+      ],
+    })
+  }
+
+  /* This adds each new message to the preceding messages state
+   and returns a new messages state */
+  onSend(messages = []) {
+    this.setState(previousState => ({
+      messages: GiftedChat.append(previousState.messages, messages),
+    }))
   }
 
   render() {
 
-    // backgroundColor as selected by the user on Start screen
-    let backGround = this.props.route.params.backGround;
+    let { name, backGround } = this.state;
 
     return (
       <View
@@ -50,47 +77,49 @@ export default class Chat extends Component {
           backgroundColor: backGround
         }}
       >
+        <GiftedChat
+          messages={this.state.messages}
+          onSend={messages => this.onSend(messages)}
+          user={{
+            _id: 1,
+          }}
+        />
 
-        {/* To be changed to a combination of previous texts and a textInput */}
-        <Text style={styles.userChat}>Hello</Text>
-        <Text style={styles.friendChat}>Hello {this.state.name}</Text>
-        <Text style={styles.userChat}>My colour choice is: {backGround}</Text>
       </View>
     )
   }
 }
 
-
 const styles = StyleSheet.create({
-  chatBackground: {
-    flex: 1,
-    flexDirection: 'column',
-    justifyContent: 'flex-start',
-  },
-  userChat: {
-    fontSize: 16,
-    fontWeight: '300',
-    color: '#000',
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 7,
-    backgroundColor: '#FFF',
-    alignSelf: 'flex-start',
-    margin: '3%',
-    paddingHorizontal: '1%',
-    paddingVertical: '1%',
-  },
-  friendChat: {
-    fontSize: 16,
-    fontWeight: '300',
-    color: '#000',
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 7,
-    backgroundColor: '#d6d6d6',
-    alignSelf: 'flex-end',
-    margin: '3%',
-    paddingHorizontal: '1%',
-    paddingVertical: '1%',
-  }
+  // chatBackground: {
+  //   flex: 1,
+  //   flexDirection: 'column',
+  //   justifyContent: 'flex-start',
+  // },
+  // userChat: {
+  //   fontSize: 16,
+  //   fontWeight: '300',
+  //   color: '#000',
+  //   borderColor: '#000',
+  //   borderWidth: 1,
+  //   borderRadius: 7,
+  //   backgroundColor: '#FFF',
+  //   alignSelf: 'flex-start',
+  //   margin: '3%',
+  //   paddingHorizontal: '1%',
+  //   paddingVertical: '1%',
+  // },
+  // friendChat: {
+  //   fontSize: 16,
+  //   fontWeight: '300',
+  //   color: '#000',
+  //   borderColor: '#000',
+  //   borderWidth: 1,
+  //   borderRadius: 7,
+  //   backgroundColor: '#d6d6d6',
+  //   alignSelf: 'flex-end',
+  //   margin: '3%',
+  //   paddingHorizontal: '1%',
+  //   paddingVertical: '1%',
+  // }
 });

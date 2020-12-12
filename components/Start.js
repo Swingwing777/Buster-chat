@@ -18,7 +18,7 @@ export default class Start extends Component {
 
     this.state = {
       name: '',
-      backGround: ''
+      backGround: '',
     }
   }
 
