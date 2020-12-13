@@ -21,9 +21,9 @@ export default class Chat extends Component {
     };
   };
 
-  /* Separate init() method to keep all initialisation 
-  as an all-in-one concern, (and outside render method 
-  to prevent React Warnings)
+  /* Separate init() method to keep all state initialisation 
+  as an all-in-one concern for neatness, (and outside render method 
+  to prevent React Warnings).  
   */
 
   init() {
