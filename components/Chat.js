@@ -21,8 +21,9 @@ export default class Chat extends Component {
     };
   };
 
-  /* Separate init() method to keep all initailisation 
-  as all-in-one concern, and outside render method - to prevent React Warning
+  /* Separate init() method to keep all initialisation 
+  as an all-in-one concern, (and outside render method 
+  to prevent React Warnings)
   */
 
   init() {
@@ -76,10 +77,10 @@ export default class Chat extends Component {
         {...props}
         wrapperStyle={{
           left: {
-            backgroundColor: '#E8F5FF',
+            backgroundColor: '#E8F5FF',   // Off-white/powder blue
           },
           right: {
-            backgroundColor: '#081721'
+            backgroundColor: '#081721'    // Midnight blue
           }
         }} />
     )
@@ -87,15 +88,20 @@ export default class Chat extends Component {
 
   render() {
 
-    let { name, backGround } = this.state;
+    let { backGround } = this.state;
 
     return (
       <View
+
+        /* Flex: 1 prop essential to ensure View
+         fills entire available space */
         style={{
           flex: 1,
           backgroundColor: backGround
         }}
       >
+
+        {/* GiftedChat renders chat progress */}
         <GiftedChat
           renderBubble={this.renderBubble}
           messages={this.state.messages}
@@ -105,6 +111,7 @@ export default class Chat extends Component {
           }}
         />
 
+        {/* Cures Android keyboard overlap issue */}
         { Platform.OS === 'android'
           ? <KeyboardAvoidingView behavior="height" />
           : null
