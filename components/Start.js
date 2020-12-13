@@ -35,9 +35,10 @@ export default class Start extends Component {
         <ImageBackground
           style={styles.image}
           source={require('../assets/background.png')}
+          accessibilityRole='image'
         >
 
-          <Text style={styles.appTitle}>
+          <Text style={styles.appTitle} accessibilityRole='text'>
             Chit-Chat
           </Text>
 
@@ -45,6 +46,10 @@ export default class Start extends Component {
 
             <TextInput
               style={styles.nameInput}
+              accessible={true}
+              accessibilityLabel='Type name here'
+              accessibilityHint='Adds your name to the Chat screen'
+              accessibilityRole='none'
               onChangeText={(name) => this.setState({ name })}
               value={this.state.name}
               placeholder='Your Name'
@@ -53,28 +58,39 @@ export default class Start extends Component {
             <Text style={styles.chooseColor}>
               Choose Background Color
             </Text>
-            <View style={styles.buttonRow}>
+            <View
+              style={styles.buttonRow}
+              accessibilityRole='combobox'
+            >
               <TouchableOpacity
                 style={[styles.buttonColor, styles.button1]}
-                accessibilityLabel='Select Black Background'
+                accessibilityLabel='Press me'
+                accessibilityHint='Selects a black Chat background'
+                accessibilityRole='button'
                 onPress={() => this.setState({ backGround: '#090C08' })}
               />
 
               <TouchableOpacity
                 style={[styles.buttonColor, styles.button2]}
-                accessibilityLabel='Select Dark Grey Background'
+                accessibilityLabel='Press me'
+                accessibilityHint='Selects a dark grey Chat background'
+                accessibilityRole='button'
                 onPress={() => this.setState({ backGround: '#474056' })}
               />
 
               <TouchableOpacity
                 style={[styles.buttonColor, styles.button3]}
-                accessibilityLabel='Select Mid Grey Background'
+                accessibilityLabel='Press me'
+                accessibilityHint='Selects a mid grey Chat background'
+                accessibilityRole='button'
                 onPress={() => this.setState({ backGround: '#8A95A5' })}
               />
 
               <TouchableOpacity
                 style={[styles.buttonColor, styles.button4]}
-                accessibilityLabel='Select Field Grey Background'
+                accessibilityLabel='Press me'
+                accessibilityHint='Selects a field grey Chat background'
+                accessibilityRole='button'
                 onPress={() => this.setState({ backGround: '#B9C6AE' })}
               />
 
@@ -82,7 +98,10 @@ export default class Start extends Component {
 
             <TouchableOpacity
               style={styles.chatButton}
+              accessible={true}
               accessibilityLabel='Start chatting'
+              accessibilityHint='Navigates to the Chat screen'
+              accessibilityRole='button'
               color='#757083'
               onPress={
                 () => this.props.navigation.navigate(

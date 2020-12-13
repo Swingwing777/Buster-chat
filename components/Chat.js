@@ -1,11 +1,12 @@
 // Chat.js
 
 import React, { Component } from 'react';
-import { GiftedChat } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble } from 'react-native-gifted-chat'
 
 import {
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
-  Text,
   View
 } from 'react-native';
 
@@ -54,6 +55,12 @@ export default class Chat extends Component {
             avatar: 'https://placeimg.com/140/140/any',
           },
         },
+        {
+          _id: 2,
+          text: `Developer has entered the chat`,
+          createdAt: new Date(),
+          system: true,
+        },
       ],
     })
   }
@@ -64,6 +71,21 @@ export default class Chat extends Component {
     this.setState(previousState => ({
       messages: GiftedChat.append(previousState.messages, messages),
     }))
+  }
+
+  renderBubble(props) {
+    return (
+      <Bubble
+        {...props}
+        wrapperStyle={{
+          left: {
+            backgroundColor: '#E8F5FF',
+          },
+          right: {
+            backgroundColor: '#081721'
+          }
+        }} />
+    )
   }
 
   render() {
@@ -78,6 +100,7 @@ export default class Chat extends Component {
         }}
       >
         <GiftedChat
+          renderBubble={this.renderBubble}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={{
@@ -85,41 +108,12 @@ export default class Chat extends Component {
           }}
         />
 
+        { Platform.OS === 'android'
+          ? <KeyboardAvoidingView behavior="height" />
+          : null
+        }
+
       </View>
     )
   }
 }
-
-const styles = StyleSheet.create({
-  // chatBackground: {
-  //   flex: 1,
-  //   flexDirection: 'column',
-  //   justifyContent: 'flex-start',
-  // },
-  // userChat: {
-  //   fontSize: 16,
-  //   fontWeight: '300',
-  //   color: '#000',
-  //   borderColor: '#000',
-  //   borderWidth: 1,
-  //   borderRadius: 7,
-  //   backgroundColor: '#FFF',
-  //   alignSelf: 'flex-start',
-  //   margin: '3%',
-  //   paddingHorizontal: '1%',
-  //   paddingVertical: '1%',
-  // },
-  // friendChat: {
-  //   fontSize: 16,
-  //   fontWeight: '300',
-  //   color: '#000',
-  //   borderColor: '#000',
-  //   borderWidth: 1,
-  //   borderRadius: 7,
-  //   backgroundColor: '#d6d6d6',
-  //   alignSelf: 'flex-end',
-  //   margin: '3%',
-  //   paddingHorizontal: '1%',
-  //   paddingVertical: '1%',
-  // }
-});
