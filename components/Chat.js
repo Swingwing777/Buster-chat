@@ -16,12 +16,13 @@ export default class Chat extends Component {
 
     this.state = {
       backGround: '',
+      name: '',
       messages: [],
     };
   };
 
-  /* Separate init() method to keep update functions outside 
-  render method - to prevent React Warning
+  /* Separate init() method to keep all initailisation 
+  as all-in-one concern, and outside render method - to prevent React Warning
   */
 
   init() {
@@ -36,18 +37,10 @@ export default class Chat extends Component {
     this.setState({
       name: name,
       backGround: backGround,
-    })
-  }
-
-  componentDidMount() {
-    this.init();
-
-    // This sets a static messages object in the required format 
-    this.setState({
       messages: [
         {
           _id: 1,
-          text: 'Hello developer',
+          text: 'Hello ' + name,
           createdAt: new Date(),
           user: {
             _id: 2,
@@ -57,12 +50,16 @@ export default class Chat extends Component {
         },
         {
           _id: 2,
-          text: `Developer has entered the chat`,
+          text: name + ` has entered the chat`,
           createdAt: new Date(),
           system: true,
         },
       ],
     })
+  }
+
+  componentDidMount() {
+    this.init();
   }
 
   /* This adds each new message to the preceding messages state
