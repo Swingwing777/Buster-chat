@@ -18,14 +18,15 @@ export default class Chat extends Component {
     super();
 
     this.state = {
-      backGround: '',
+      uid: 0,
+      backGround: '#474056',
       name: '',
       messages: [],
       loggedInText: 'Please wait for authentication',
       user: {
         _id: '',
         name: '',
-        avatar: ''
+        avatar: '',
       },
     };
 
@@ -91,32 +92,38 @@ export default class Chat extends Component {
     })
 
     // Firebase user authentication
-    this.authUnsubscribe = firebase.auth().
-      onAuthStateChanged(async (user) => {
+    this.authUnsubscribe = firebase
+      .auth()
+      .onAuthStateChanged(async (user) => {
+
         if (!user) {
-          await firebase.auth().signInAnonymously();
+          try {
+            await firebase.auth().signInAnonymously();
+          } catch (error) {
+            console.log(`Sign-in denied: ${error.message}`);
+          }
         }
 
         // Update user state with currently active user data
         this.setState({
+          // uid: user.uid,
           user: {
-            _id: user._id,
+            _id: user.uid,
             name: name,
             avatar: "https://placeimg.com/140/140/any",
           },
           loggedInText: `${name} has entered the chat`,
-          messages: [],
+          messages: [{
+            _id: 2,
+            text: `${name} has entered the chat`,
+            createdAt: new Date(),
+            system: true,
+          },
+          ],
         });
+        this.unsubscribe = this.referenceMessages
+          .onSnapshot(this.onCollectionUpdate);
       });
-
-    // User wants to see all messages, not filtered.
-    if (this.referenceMessages !== null) {
-      this.unsubscribe = this.referenceMessages
-        .onSnapshot(this.onCollectionUpdate);
-
-    } else {
-      Alert.alert('You have no messages');
-    }
   }
 
   componentWillUnmount() {
@@ -133,7 +140,7 @@ export default class Chat extends Component {
       _id: message._id,
       text: message.text || "",
       createdAt: message.createdAt,
-      user: message.user._id,
+      user: message.user,
       sent: true,
     });
   };
@@ -149,6 +156,9 @@ export default class Chat extends Component {
         this.addMessages();
       }
     );
+
+    // this.addMessages();
+
   }
 
   renderBubble(props) {
@@ -187,7 +197,7 @@ export default class Chat extends Component {
           renderBubble={this.renderBubble}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
-          user={this.state.user._id}
+          user={this.state.user}
         />
 
         {/* Cures Android keyboard overlap issue */}
