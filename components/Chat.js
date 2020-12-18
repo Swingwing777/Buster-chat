@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import { GiftedChat, Bubble } from 'react-native-gifted-chat'
 import firebase from "firebase";
 import "firebase/firestore";
+import { v4 as uuidv4 } from 'uuid';
 
 import {
   KeyboardAvoidingView,
@@ -81,14 +82,30 @@ export default class Chat extends Component {
 
     let { name, backGround } = this.props.route.params;
 
-    // Set a default username if the user does not enter one
+    /* Set a default username for title area 
+    if the user does not enter one */
     if (!name || name === '') name = 'User';
+
+    // create login system message
+    this.id = uuidv4();
+    const loginMsg = {
+      _id: this.id,
+      text: `${name} has entered the chat`,
+      createdAt: new Date(),
+      system: true,
+      user: {},
+    };
+
+    // Add login system message to collection
+    this.loginMessage(loginMsg);
 
     // Displays desired background and username in the navbar
     this.props.navigation.setOptions({ title: name });
+
     this.setState({
       name: name,
       backGround: backGround,
+      messages: [],
     })
 
     // Firebase user authentication
@@ -112,17 +129,15 @@ export default class Chat extends Component {
             name: name,
             avatar: "https://placeimg.com/140/140/any",
           },
-          loggedInText: `${name} has entered the chat`,
-          messages: [{
-            _id: 2,
-            text: `${name} has entered the chat`,
-            createdAt: new Date(),
-            system: true,
-          },
-          ],
+
+          // Blank the authentication message
+          loggedInText: '',
+          //messages: [],
         });
+
         this.unsubscribe = this.referenceMessages
           .onSnapshot(this.onCollectionUpdate);
+
       });
   }
 
@@ -131,6 +146,9 @@ export default class Chat extends Component {
     this.authUnsubscribe();
   }
 
+  loginMessage = (msg) => {
+    this.referenceMessages.add(msg)
+  };
 
   // Messages added to Firestore from state
   addMessages = () => {
@@ -156,9 +174,6 @@ export default class Chat extends Component {
         this.addMessages();
       }
     );
-
-    // this.addMessages();
-
   }
 
   renderBubble(props) {
