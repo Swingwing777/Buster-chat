@@ -53,7 +53,11 @@ export default class Chat extends Component {
   };
 
   onCollectionUpdate = (querySnapshot) => {
-    const messages = [];
+
+    /* Use this.state.messages rather than []
+    to avoid deleting system message on login */
+    const messages = this.state.messages;
+
     // go through each document
     querySnapshot.forEach((doc) => {
       // get the QueryDocumentSnapshot's data
@@ -88,16 +92,6 @@ export default class Chat extends Component {
 
     // create login system message
     this.id = uuidv4();
-    const loginMsg = {
-      _id: this.id,
-      text: `${name} has entered the chat`,
-      createdAt: new Date(),
-      system: true,
-      user: {},
-    };
-
-    // Add login system message to collection
-    this.loginMessage(loginMsg);
 
     // Displays desired background and username in the navbar
     this.props.navigation.setOptions({ title: name });
@@ -105,7 +99,13 @@ export default class Chat extends Component {
     this.setState({
       name: name,
       backGround: backGround,
-      messages: [],
+      messages: [{
+        _id: this.id,
+        text: `${name} has entered the chat`,
+        createdAt: new Date(),
+        system: true,
+        //user: {},
+      }],
     })
 
     // Firebase user authentication
@@ -132,7 +132,7 @@ export default class Chat extends Component {
 
           // Blank the authentication message
           loggedInText: '',
-          //messages: [],
+          // messages: [],
         });
 
         this.unsubscribe = this.referenceMessages
@@ -145,10 +145,6 @@ export default class Chat extends Component {
     this.unsubscribe();
     this.authUnsubscribe();
   }
-
-  loginMessage = (msg) => {
-    this.referenceMessages.add(msg)
-  };
 
   // Messages added to Firestore from state
   addMessages = () => {
@@ -220,6 +216,7 @@ export default class Chat extends Component {
           ? <KeyboardAvoidingView behavior="height" />
           : null
         }
+
       </View>
     )
   }
