@@ -159,8 +159,7 @@ export default class Chat extends Component {
     });
   };
 
-  /* This adds each new message to the preceding messages state
-  and returns a new messages state */
+  // Adds new message to preceding messages state & returns new messages state
   onSend(messages = []) {
     this.setState(
       (previousState) => ({
@@ -193,9 +192,7 @@ export default class Chat extends Component {
 
     return (
       <View
-
-        /* Flex: 1 prop essential to ensure View
-         fills entire available space */
+        // Flex: 1 prop essential to ensure View fills entire available space
         style={{
           flex: 1,
           backgroundColor: backGround
@@ -216,7 +213,6 @@ export default class Chat extends Component {
           ? <KeyboardAvoidingView behavior="height" />
           : null
         }
-
       </View>
     )
   }
