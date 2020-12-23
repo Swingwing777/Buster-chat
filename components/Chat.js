@@ -5,6 +5,7 @@ import { GiftedChat, Bubble } from 'react-native-gifted-chat'
 import firebase from "firebase";
 import "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
+import AsyncStorage from '@react-native-community/async-storage';
 
 import {
   KeyboardAvoidingView,
@@ -54,9 +55,9 @@ export default class Chat extends Component {
 
   onCollectionUpdate = (querySnapshot) => {
 
-    /* Use this.state.messages rather than []
-    to avoid deleting system message on login */
-    const messages = this.state.messages;
+    /* Use [] instead of this.state.messages to 
+    avoid message duplication */
+    const messages = [];
 
     // go through each document
     querySnapshot.forEach((doc) => {
@@ -79,7 +80,18 @@ export default class Chat extends Component {
     if (!messages.length > 0) {
       Alert.alert('You have no messages');
     }
+  };
 
+  async getMessages() {
+    let messages = '';
+    try {
+      messages = await AsyncStorage.getItem('messages') || [];
+      this.setState({
+        messages: JSON.parse(messages)
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   componentDidMount() {
@@ -99,14 +111,10 @@ export default class Chat extends Component {
     this.setState({
       name: name,
       backGround: backGround,
-      messages: [{
-        _id: this.id,
-        text: `${name} has entered the chat`,
-        createdAt: new Date(),
-        system: true,
-        //user: {},
-      }],
     })
+
+    // retrieve chat messages from asyncStorage 
+    this.getMessages();
 
     // Firebase user authentication
     this.authUnsubscribe = firebase
@@ -132,12 +140,18 @@ export default class Chat extends Component {
 
           // Blank the authentication message
           loggedInText: '',
-          // messages: [],
+          messages: [
+            {
+              _id: this.id,
+              text: `${name} has entered the chat`,
+              createdAt: new Date(),
+              system: true,
+            }
+          ],
         });
 
         this.unsubscribe = this.referenceMessages
           .onSnapshot(this.onCollectionUpdate);
-
       });
   }
 
