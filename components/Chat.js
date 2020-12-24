@@ -82,6 +82,7 @@ export default class Chat extends Component {
     }
   };
 
+  // To update messages from local storage
   async getMessages() {
     let messages = '';
     try {
@@ -93,6 +94,28 @@ export default class Chat extends Component {
       console.log(error.message);
     }
   };
+
+  // To save messages state to local storage as 'messages' key 
+  async saveMessages() {
+    try {
+      await AsyncStorage
+        .setItem('messages', JSON.stringify(this.state.messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  // To delete the locally stored 'messages' key
+  async deleteMessages() {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 
   componentDidMount() {
 
@@ -181,6 +204,9 @@ export default class Chat extends Component {
       }),
       () => {
         this.addMessages();
+
+        // Call funciton to save to local storage
+        this.saveMessages();
       }
     );
   }
