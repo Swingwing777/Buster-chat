@@ -6,6 +6,7 @@ import firebase from "firebase";
 import "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
+import NetInfo from "@react-native-community/netinfo";
 
 import {
   KeyboardAvoidingView,
@@ -30,6 +31,7 @@ export default class Chat extends Component {
         name: '',
         avatar: '',
       },
+      isConnected: false,
     };
 
     const firebaseConfig = {
@@ -120,6 +122,7 @@ export default class Chat extends Component {
   componentDidMount() {
 
     let { name, backGround } = this.props.route.params;
+    let isConnected = this.state.isConnected;
 
     /* Set a default username for title area 
     if the user does not enter one */
@@ -137,45 +140,58 @@ export default class Chat extends Component {
     })
 
     // retrieve chat messages from asyncStorage 
-    this.getMessages();
+    // this.getMessages();
 
-    // Firebase user authentication
-    this.authUnsubscribe = firebase
-      .auth()
-      .onAuthStateChanged(async (user) => {
+    NetInfo.fetch().then(connection => {
+      if (connection.isConnected) {
 
-        if (!user) {
-          try {
-            await firebase.auth().signInAnonymously();
-          } catch (error) {
-            console.log(`Sign-in denied: ${error.message}`);
-          }
-        }
+        // Firebase user authentication
+        this.authUnsubscribe = firebase
+          .auth()
+          .onAuthStateChanged(async (user) => {
 
-        // Update user state with currently active user data
-        this.setState({
-          // uid: user.uid,
-          user: {
-            _id: user.uid,
-            name: name,
-            avatar: "https://placeimg.com/140/140/any",
-          },
-
-          // Blank the authentication message
-          loggedInText: '',
-          messages: [
-            {
-              _id: this.id,
-              text: `${name} has entered the chat`,
-              createdAt: new Date(),
-              system: true,
+            if (!user) {
+              try {
+                await firebase.auth().signInAnonymously();
+              } catch (error) {
+                console.log(`Sign-in denied: ${error.message}`);
+              }
             }
-          ],
+
+            // Update user state with currently active user data
+            this.setState({
+              user: {
+                _id: user.uid,
+                name: name,
+                avatar: "https://placeimg.com/140/140/any",
+              },
+
+              // Blank the authentication message
+              loggedInText: '',
+              messages: [
+                {
+                  _id: this.id,
+                  text: `${name} has entered the chat`,
+                  createdAt: new Date(),
+                  system: true,
+                }
+              ],
+            });
+
+            this.unsubscribe = this.referenceMessages
+              .orderBy("createdAt", "desc")
+              .onSnapshot(this.onCollectionUpdate);
+          });
+      } else {
+        this.setState({
+          isConnected: false,
+          loggedInText: 'Offline',
         });
 
-        this.unsubscribe = this.referenceMessages
-          .onSnapshot(this.onCollectionUpdate);
-      });
+        // retrieve chat messages from asyncStorage 
+        this.getMessages();
+      }
+    });
   }
 
   componentWillUnmount() {
@@ -224,6 +240,17 @@ export default class Chat extends Component {
           }
         }} />
     )
+  }
+
+  renderInputToolbar(props) {
+    if (this.state.isConnected == false) {
+    } else {
+      return(
+        <InputToolbar
+        {...props}
+        />
+      );
+    }
   }
 
   render() {
