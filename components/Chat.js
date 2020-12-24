@@ -1,7 +1,7 @@
 // Chat.js
 
 import React, { Component } from 'react';
-import { GiftedChat, Bubble } from 'react-native-gifted-chat'
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat'
 import firebase from "firebase";
 import "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
@@ -139,8 +139,8 @@ export default class Chat extends Component {
       backGround: backGround,
     })
 
-    // retrieve chat messages from asyncStorage 
-    // this.getMessages();
+    // Always want to retrieve chat messages from asyncStorage - might cause unmounted setState warnings
+    //this.getMessages();
 
     NetInfo.fetch().then(connection => {
       if (connection.isConnected) {
@@ -160,6 +160,7 @@ export default class Chat extends Component {
 
             // Update user state with currently active user data
             this.setState({
+              isConnected: true,
               user: {
                 _id: user.uid,
                 name: name,
@@ -242,16 +243,18 @@ export default class Chat extends Component {
     )
   }
 
-  renderInputToolbar(props) {
-    if (this.state.isConnected == false) {
-    } else {
-      return(
-        <InputToolbar
-        {...props}
-        />
-      );
-    }
-  }
+  // To render message toolbar only if user is online
+  // renderInputToolbar(props) {
+  //   const isConnected = this.state.isConnected;
+  //   if (isConnected == false) {
+  //   } else {
+  //     return (
+  //       <InputToolbar
+  //         {...props}
+  //       />
+  //     );
+  //   }
+  // }
 
   render() {
 
@@ -270,6 +273,7 @@ export default class Chat extends Component {
         {/* GiftedChat renders chat progress */}
         <GiftedChat
           renderBubble={this.renderBubble}
+          renderInputToolbar={this.renderInputToolbar}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={this.state.user}
