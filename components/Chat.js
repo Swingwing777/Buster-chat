@@ -7,6 +7,7 @@ import "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from "@react-native-community/netinfo";
+import { Button } from 'react-native';
 
 import {
   KeyboardAvoidingView,
@@ -21,6 +22,7 @@ export default class Chat extends Component {
     super();
 
     this.state = {
+      isConnected: false,
       uid: 0,
       backGround: '#474056',
       name: '',
@@ -30,8 +32,7 @@ export default class Chat extends Component {
         _id: '',
         name: '',
         avatar: '',
-      },
-      isConnected: false,
+      }
     };
 
     const firebaseConfig = {
@@ -54,6 +55,91 @@ export default class Chat extends Component {
     this.referenceMessages =
       firebase.firestore().collection('messages');
   };
+
+  componentDidMount() {
+
+    let { name, backGround } = this.props.route.params;
+    //let isConnected = this.state.isConnected;
+
+    /* Set a default username for title area 
+    if the user does not enter one */
+    if (!name || name === '') name = 'User';
+
+    // create login system message
+    this.id = uuidv4();
+
+    // Displays desired background and username in the navbar
+    this.props.navigation.setOptions({ title: name });
+
+    this.setState({
+      name: name,
+      backGround: backGround,
+      // isConnected: false,
+    })
+
+    // Always want to retrieve chat messages from asyncStorage - might cause unmounted setState warnings
+    //this.getMessages();
+
+    NetInfo.fetch().then(connection => {
+      if (connection.isConnected) {
+        this.setState({
+          isConnected: true
+        }),
+
+          // Firebase user authentication
+          this.authUnsubscribe = firebase
+            .auth()
+            .onAuthStateChanged(async (user) => {
+
+              if (!user) {
+                try {
+                  await firebase.auth().signInAnonymously();
+                } catch (error) {
+                  console.log(`Sign-in denied: ${error.message}`);
+                }
+              }
+
+              // Update user state with currently active user data
+              this.setState({
+                user: {
+                  _id: user.uid,
+                  name: name,
+                  avatar: "https://placeimg.com/140/140/any",
+                },
+
+                // Blank the authentication message
+                loggedInText: '',
+                messages: [
+                  {
+                    _id: this.id,
+                    text: `${name} has entered the chat`,
+                    createdAt: new Date(),
+                    system: true,
+                  }
+                ],
+              });
+
+              this.unsubscribe = this.referenceMessages
+                // Order by ensures correct chronological order
+                .orderBy("createdAt", "desc")
+                .onSnapshot(this.onCollectionUpdate);
+            });
+      } else {
+        this.setState({
+          // isConnected: false,
+          loggedInText: 'Offline',
+        });
+
+        // retrieve chat messages from asyncStorage 
+        this.getMessages();
+      }
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+    this.authUnsubscribe();
+  }
 
   onCollectionUpdate = (querySnapshot) => {
 
@@ -117,87 +203,6 @@ export default class Chat extends Component {
     } catch (error) {
       console.log(error.message);
     }
-  }
-
-  componentDidMount() {
-
-    let { name, backGround } = this.props.route.params;
-    let isConnected = this.state.isConnected;
-
-    /* Set a default username for title area 
-    if the user does not enter one */
-    if (!name || name === '') name = 'User';
-
-    // create login system message
-    this.id = uuidv4();
-
-    // Displays desired background and username in the navbar
-    this.props.navigation.setOptions({ title: name });
-
-    this.setState({
-      name: name,
-      backGround: backGround,
-    })
-
-    // Always want to retrieve chat messages from asyncStorage - might cause unmounted setState warnings
-    //this.getMessages();
-
-    NetInfo.fetch().then(connection => {
-      if (connection.isConnected) {
-
-        // Firebase user authentication
-        this.authUnsubscribe = firebase
-          .auth()
-          .onAuthStateChanged(async (user) => {
-
-            if (!user) {
-              try {
-                await firebase.auth().signInAnonymously();
-              } catch (error) {
-                console.log(`Sign-in denied: ${error.message}`);
-              }
-            }
-
-            // Update user state with currently active user data
-            this.setState({
-              isConnected: true,
-              user: {
-                _id: user.uid,
-                name: name,
-                avatar: "https://placeimg.com/140/140/any",
-              },
-
-              // Blank the authentication message
-              loggedInText: '',
-              messages: [
-                {
-                  _id: this.id,
-                  text: `${name} has entered the chat`,
-                  createdAt: new Date(),
-                  system: true,
-                }
-              ],
-            });
-
-            this.unsubscribe = this.referenceMessages
-              .orderBy("createdAt", "desc")
-              .onSnapshot(this.onCollectionUpdate);
-          });
-      } else {
-        this.setState({
-          isConnected: false,
-          loggedInText: 'Offline',
-        });
-
-        // retrieve chat messages from asyncStorage 
-        this.getMessages();
-      }
-    });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
-    this.authUnsubscribe();
   }
 
   // Messages added to Firestore from state
@@ -270,6 +275,9 @@ export default class Chat extends Component {
       >
         <Text>{this.state.loggedInText}</Text>
 
+        {/* Tempo render - to test isConnected state */}
+        <Text>isConnected state is: {this.state.isConnected}</Text>
+
         {/* GiftedChat renders chat progress */}
         <GiftedChat
           renderBubble={this.renderBubble}
@@ -284,6 +292,14 @@ export default class Chat extends Component {
           ? <KeyboardAvoidingView behavior="height" />
           : null
         }
+
+        {/* Development use only */}
+        <Button
+          title='Delete Messages'
+          accessibilityLabel='Developer delete messages'
+          onPress={() =>
+            this.deleteMessages()
+          } />
       </View>
     )
   }
