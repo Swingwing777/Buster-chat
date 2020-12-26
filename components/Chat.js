@@ -308,6 +308,7 @@ export default class Chat extends Component {
     let { backGround } = this.state;
     let { /* isConnected, */ loggedInText } = this.state;
     return (
+
       <View
         // Flex: 1 prop essential to ensure View fills entire available space
         style={{
