@@ -7,7 +7,7 @@ import "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from "@react-native-community/netinfo";
-import { Button } from 'react-native';
+import { Button, Keyboard } from 'react-native';
 
 import {
   KeyboardAvoidingView,
@@ -20,9 +20,8 @@ import {
 export default class Chat extends Component {
   constructor() {
     super();
-
     this.state = {
-      isConnected: false,
+      isConnected: 'false',
       uid: 0,
       backGround: '#474056',
       name: '',
@@ -57,7 +56,6 @@ export default class Chat extends Component {
   };
 
   componentDidMount() {
-
     let { name, backGround } = this.props.route.params;
     //let isConnected = this.state.isConnected;
 
@@ -74,59 +72,55 @@ export default class Chat extends Component {
     this.setState({
       name: name,
       backGround: backGround,
-      // isConnected: false,
     })
 
     // Always want to retrieve chat messages from asyncStorage - might cause unmounted setState warnings
     //this.getMessages();
 
-    NetInfo.fetch().then(connection => {
+    NetInfo.fetch().then((connection) => {
       if (connection.isConnected) {
-        this.setState({
-          isConnected: true
-        }),
 
-          // Firebase user authentication
-          this.authUnsubscribe = firebase
-            .auth()
-            .onAuthStateChanged(async (user) => {
-
-              if (!user) {
-                try {
-                  await firebase.auth().signInAnonymously();
-                } catch (error) {
-                  console.log(`Sign-in denied: ${error.message}`);
-                }
+        // Firebase user authentication
+        this.authUnsubscribe = firebase
+          .auth()
+          .onAuthStateChanged(async (user) => {
+            if (!user) {
+              try {
+                await firebase.auth().signInAnonymously();
+              } catch (error) {
+                console.log(`Sign-in denied: ${error.message}`);
               }
+            }
 
-              // Update user state with currently active user data
-              this.setState({
-                user: {
-                  _id: user.uid,
-                  name: name,
-                  avatar: "https://placeimg.com/140/140/any",
-                },
+            // Update user state with currently active user data
+            this.setState({
+              isConnected: 'true',
+              user: {
+                _id: user.uid,
+                name: name,
+                avatar: "https://placeimg.com/140/140/any",
+              },
 
-                // Blank the authentication message
-                loggedInText: '',
-                messages: [
-                  {
-                    _id: this.id,
-                    text: `${name} has entered the chat`,
-                    createdAt: new Date(),
-                    system: true,
-                  }
-                ],
-              });
-
-              this.unsubscribe = this.referenceMessages
-                // Order by ensures correct chronological order
-                .orderBy("createdAt", "desc")
-                .onSnapshot(this.onCollectionUpdate);
+              // Blank the authentication message
+              loggedInText: '',
+              messages: [
+                {
+                  _id: this.id,
+                  text: `${name} has entered the chat`,
+                  createdAt: new Date(),
+                  system: true,
+                }
+              ],
             });
+
+            this.unsubscribe = this.referenceMessages
+              // Order by ensures correct chronological order
+              .orderBy("createdAt", "desc")
+              .onSnapshot(this.onCollectionUpdate);
+          });
       } else {
         this.setState({
-          // isConnected: false,
+          isConnected: 'false',
           loggedInText: 'Offline',
         });
 
@@ -137,12 +131,13 @@ export default class Chat extends Component {
   }
 
   componentWillUnmount() {
-    this.unsubscribe();
-    this.authUnsubscribe();
+    if (this.state.isConnected) {
+      this.unsubscribe();
+      this.authUnsubscribe();
+    }
   }
 
   onCollectionUpdate = (querySnapshot) => {
-
     /* Use [] instead of this.state.messages to 
     avoid message duplication */
     const messages = [];
@@ -218,6 +213,32 @@ export default class Chat extends Component {
     });
   };
 
+  /* For developer use - This clears out all messages in Firestore,
+  but leaves placeholder to maintain collection */
+  async deleteMessagesFirestore(error) {
+    collectionPlaceholder =
+    {
+      _id: 1,
+      text: 'Hello',
+      createdAt: new Date(),
+      user: {
+        _id: 1,
+        name: 'Creator',
+        avatar: "https://sweepback.co.uk/img/creator.jpg",
+        // avatar: '../assets/creator.jpg',
+      },
+      sent: true,
+    }
+    this.referenceMessages.get()
+      .then(res => {
+        res.forEach(doc => {
+          doc.ref.delete();
+        })
+        this.referenceMessages.add(collectionPlaceholder);
+      })
+      .catch(error);
+  }
+
   // Adds new message to preceding messages state & returns new messages state
   onSend(messages = []) {
     this.setState(
@@ -227,11 +248,34 @@ export default class Chat extends Component {
       () => {
         this.addMessages();
 
-        // Call funciton to save to local storage
+        // Call function to save to local storage
         this.saveMessages();
+        // Hide keyboard after message sent
+        Keyboard.dismiss();
       }
     );
   }
+
+  // onLongPress(context, message) {
+  //   const { messages } = this.state;
+  //   const options = ['Delete Message', 'Copy Text', 'Cancel'];
+  //   const cancelButtonIndex = options.length - 1;
+  //   context.actionSheet().showActionSheetWithOptions({
+  //     options,
+  //     cancelButtonIndex
+  //   }, (buttonIndex) => {
+  //     switch (buttonIndex) {
+  //       case 0:
+  //         let temp = messages.filter(temp => message._id !== temp._id);
+  //         this.setState({ messages: temp, });
+  //         this.deleteMessageServer(temp);
+  //         break;
+  //       case 1:
+  //         Clipboard.setString(this.props.currentMessage.text);
+  //         break;
+  //     }
+  //   });
+  // }
 
   renderBubble(props) {
     return (
@@ -249,22 +293,20 @@ export default class Chat extends Component {
   }
 
   // To render message toolbar only if user is online
-  // renderInputToolbar(props) {
-  //   const isConnected = this.state.isConnected;
-  //   if (isConnected == false) {
-  //   } else {
-  //     return (
-  //       <InputToolbar
-  //         {...props}
-  //       />
-  //     );
-  //   }
+  renderInputToolbar(props) {
+    // if (this.state.isConnected == 'false') {
+    // } else {
+    return (
+      <InputToolbar
+        {...props}
+      />
+    );
+  }
   // }
 
   render() {
-
     let { backGround } = this.state;
-
+    let { isConnected, loggedInText } = this.state;
     return (
       <View
         // Flex: 1 prop essential to ensure View fills entire available space
@@ -273,10 +315,10 @@ export default class Chat extends Component {
           backgroundColor: backGround
         }}
       >
-        <Text>{this.state.loggedInText}</Text>
+        <Text>{loggedInText}</Text>
 
         {/* Tempo render - to test isConnected state */}
-        <Text>isConnected state is: {this.state.isConnected}</Text>
+        <Text>isConnected state is: {isConnected}</Text>
 
         {/* GiftedChat renders chat progress */}
         <GiftedChat
@@ -285,6 +327,8 @@ export default class Chat extends Component {
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={this.state.user}
+          renderUsernameOnMessage={true}
+          onLongPress={this.onLongPress}
         />
 
         {/* Cures Android keyboard overlap issue */}
@@ -295,11 +339,12 @@ export default class Chat extends Component {
 
         {/* Development use only */}
         <Button
-          title='Delete Messages'
+          title='Dev Use: Delete Local/Remote'
           accessibilityLabel='Developer delete messages'
-          onPress={() =>
+          onPress={() => {
             this.deleteMessages()
-          } />
+            this.deleteMessagesFirestore()
+          }} />
       </View>
     )
   }
