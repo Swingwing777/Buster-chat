@@ -21,7 +21,7 @@ export default class Chat extends Component {
   constructor() {
     super();
     this.state = {
-      isConnected: 'false',
+      isConnected: false,
       uid: 0,
       backGround: '#474056',
       name: '',
@@ -75,7 +75,7 @@ export default class Chat extends Component {
     })
 
     // Always want to retrieve chat messages from asyncStorage - might cause unmounted setState warnings
-    //this.getMessages();
+    this.getMessages();
 
     NetInfo.fetch().then((connection) => {
       if (connection.isConnected) {
@@ -94,7 +94,7 @@ export default class Chat extends Component {
 
             // Update user state with currently active user data
             this.setState({
-              isConnected: 'true',
+              isConnected: true,
               user: {
                 _id: user.uid,
                 name: name,
@@ -120,7 +120,7 @@ export default class Chat extends Component {
           });
       } else {
         this.setState({
-          isConnected: 'false',
+          isConnected: false,
           loggedInText: 'Offline',
         });
 
@@ -294,19 +294,19 @@ export default class Chat extends Component {
 
   // To render message toolbar only if user is online
   renderInputToolbar(props) {
-    // if (this.state.isConnected == 'false') {
-    // } else {
-    return (
-      <InputToolbar
-        {...props}
-      />
-    );
+    if (props.isConnected == false) {
+    } else {
+      return (
+        <InputToolbar
+          {...props}
+        />
+      );
+    }
   }
-  // }
 
   render() {
     let { backGround } = this.state;
-    let { isConnected, loggedInText } = this.state;
+    let { /* isConnected, */ loggedInText } = this.state;
     return (
       <View
         // Flex: 1 prop essential to ensure View fills entire available space
@@ -318,11 +318,13 @@ export default class Chat extends Component {
         <Text>{loggedInText}</Text>
 
         {/* Tempo render - to test isConnected state */}
-        <Text>isConnected state is: {isConnected}</Text>
+        {/* <Text>isConnected state is: {isConnected.toString()}</Text> */}
 
         {/* GiftedChat renders chat progress */}
         <GiftedChat
           renderBubble={this.renderBubble}
+          // Add isConnected state to GiftedChat props
+          isConnected={this.state.isConnected}
           renderInputToolbar={this.renderInputToolbar}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
