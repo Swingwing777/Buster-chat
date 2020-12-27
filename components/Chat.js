@@ -74,7 +74,7 @@ export default class Chat extends Component {
       backGround: backGround,
     })
 
-    // Always want to retrieve chat messages from asyncStorage - might cause unmounted setState warnings
+    // Always want to retrieve chat messages from asyncStorage
     this.getMessages();
 
     NetInfo.fetch().then((connection) => {
@@ -213,8 +213,7 @@ export default class Chat extends Component {
     });
   };
 
-  /* For developer use - This clears out all messages in Firestore,
-  but leaves placeholder to maintain collection */
+  // Developer use - Clears Firestore, leaves placeholder to maintain collection
   async deleteMessagesFirestore(error) {
     collectionPlaceholder =
     {
