@@ -2,12 +2,11 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-// import * as ImagePicker from 'expo-image-picker';
-// import * as Permissions from 'expo-permissions';
-// import * as MediaLibrary from 'expo-media-library';
-// import { Audio } from 'expo-av';
-// import * as Location from 'expo-location';
-// import MapView from 'react-native-maps';
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
+import * as MediaLibrary from 'expo-media-library';
+import * as Location from 'expo-location';
+import MapView from 'react-native-maps';
 
 export default class CustomActions extends Component {
   // constructor() {
@@ -34,17 +33,82 @@ export default class CustomActions extends Component {
         switch (buttonIndex) {
           case 0:
             console.log('user wants to pick an image');
+            this.pickImage();
             return;
           case 1:
             console.log('user wants to take a photo');
+            this.takePhoto()
             return;
           case 2:
             console.log('user wants to get their location');
-          default:
+            this.getLocation();
+            return;
+          default:                     // What is default for?
         }
       },
     );
   };
+
+  // This requests permission to access media and pick image
+  pickImage = async () => {
+    try {
+      // alias for Permissions.askAsync(Permissions.CAMERA_ROLL)
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+
+      if (status === 'granted') {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,    // Note: Default setting
+        }).catch(error => console.log(error));
+
+        if (!result.cancelled) {
+          this.setState({
+            image: result
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  takePhoto = async () => {
+    try {
+      const { status } = await Permissions.askAsync(
+        Permissions.CAMERA,
+        Permissions.CAMERA_ROLL
+      );
+
+      if (status === "granted") {
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        }).catch((error) => console.log(error));
+
+        if (!result.cancelled) {
+          this.setState({
+            image: result
+          });
+          // const imageUrlLink = await this.uploadImage(result.uri);
+          // this.props.onSend({ image: imageUrlLink });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  getLocation = async () => {
+    const { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status === 'granted') {
+      let result = await Location.getCurrentPositionAsync({});
+
+      if (result) {
+        this.setState({
+          location: result
+        });
+        console.log(result);
+      }
+    }
+  }
 
   render() {
     // const { statusMessage, recording, uri, playMessage } = this.state;
@@ -87,71 +151,7 @@ CustomActions.contextTypes = {
 };
 
 
-// Individual User Methods ...............
-
-  // // This requests permission to access media and pick image
-  // pickImage = async () => {
-  //   try {
-  //     // alias for Permissions.askAsync(Permissions.CAMERA_ROLL)
-  //     const { status } = await MediaLibrary.requestPermissionsAsync();
-
-  //     if (status === 'granted') {
-  //       let result = await ImagePicker.launchImageLibraryAsync({
-  //         mediaTypes: ImagePicker.MediaTypeOptions.Images,    // Note: Default setting
-  //       }).catch(error => console.log(error));
-
-  //       if (!result.cancelled) {
-  //         this.setState({
-  //           image: result
-  //         });
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-  // };
-
-  // takePhoto = async () => {
-  //   try {
-  //     const { status } = await Permissions.askAsync(
-  //       Permissions.CAMERA,
-  //       Permissions.CAMERA_ROLL
-  //     );
-
-  //     if (status === "granted") {
-  //       const result = await ImagePicker.launchCameraAsync({
-  //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //       }).catch((error) => console.log(error));
-
-  //       if (!result.cancelled) {
-  //         this.setState({
-  //           image: result
-  //         });
-  //         // const imageUrlLink = await this.uploadImage(result.uri);
-  //         // this.props.onSend({ image: imageUrlLink });
-  //       }
-  //     }
-  //   } catch (error) {
-  //     console.log(error.message);
-  //   }
-  // };
-
-  // getLocation = async () => {
-  //   const { status } = await Permissions.askAsync(Permissions.LOCATION);
-  //   if (status === 'granted') {
-  //     let result = await Location.getCurrentPositionAsync({});
-
-  //     if (result) {
-  //       this.setState({
-  //         location: result
-  //       });
-  //       console.log(result);
-  //     }
-  //   }
-  // }
-
-
-// Additional rendering..........................
+// Additional rendering from experiement project..........................
 
   // <View style={{ flex: 1, justifyContent: 'center' }}>
       //   <Text>{statusMessage}</Text>
