@@ -16,6 +16,69 @@ export default class CustomActions extends Component {
   // state = {
   // }
 
+  // This requests permission to access media and pick image
+  pickImage = async () => {
+    try {
+      // alias for Permissions.askAsync(Permissions.CAMERA_ROLL)
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+
+      if (status === 'granted') {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,    // Note: Default setting
+        }).catch(error => console.log(error));
+
+        if (!result.cancelled) {
+          this.setState({
+            image: result
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  // This requests permission to use camera and take sphoto
+  takePhoto = async () => {
+    try {
+      const { status } = await Permissions.askAsync(
+        Permissions.CAMERA,
+        Permissions.CAMERA_ROLL
+      );
+
+      if (status === "granted") {
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        }).catch((error) => console.log(error));
+
+        if (!result.cancelled) {
+          this.setState({
+            image: result
+          });
+          // const imageUrlLink = await this.uploadImage(result.uri);
+          // this.props.onSend({ image: imageUrlLink });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  //This requests permission to access location
+  getLocation = async () => {
+    const { status } = await Permissions.askAsync(Permissions.LOCATION);
+    if (status === 'granted') {
+      let result = await Location.getCurrentPositionAsync({});
+
+      if (result) {
+        this.setState({
+          location: result
+        });
+        console.log(result);
+      }
+    }
+  }
+
   onActionPress = () => {
     const options = [
       'Choose From Library',
@@ -48,67 +111,6 @@ export default class CustomActions extends Component {
       },
     );
   };
-
-  // This requests permission to access media and pick image
-  pickImage = async () => {
-    try {
-      // alias for Permissions.askAsync(Permissions.CAMERA_ROLL)
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-
-      if (status === 'granted') {
-        let result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,    // Note: Default setting
-        }).catch(error => console.log(error));
-
-        if (!result.cancelled) {
-          this.setState({
-            image: result
-          });
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  takePhoto = async () => {
-    try {
-      const { status } = await Permissions.askAsync(
-        Permissions.CAMERA,
-        Permissions.CAMERA_ROLL
-      );
-
-      if (status === "granted") {
-        const result = await ImagePicker.launchCameraAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        }).catch((error) => console.log(error));
-
-        if (!result.cancelled) {
-          this.setState({
-            image: result
-          });
-          // const imageUrlLink = await this.uploadImage(result.uri);
-          // this.props.onSend({ image: imageUrlLink });
-        }
-      }
-    } catch (error) {
-      console.log(error.message);
-    }
-  };
-
-  getLocation = async () => {
-    const { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status === 'granted') {
-      let result = await Location.getCurrentPositionAsync({});
-
-      if (result) {
-        this.setState({
-          location: result
-        });
-        console.log(result);
-      }
-    }
-  }
 
   render() {
     // const { statusMessage, recording, uri, playMessage } = this.state;

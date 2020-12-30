@@ -27,7 +27,10 @@
     "react-native-screens": "~2.10.1",
     "react-native-web": "~0.13.12",
     "react-navigation": "^4.4.3",
-    "ws": "^7.4.1"
+    "ws": "^7.4.1",
+    "expo-image-picker": "~9.1.1",
+    "expo-permissions": "~9.3.0",
+    "expo-media-library": "~9.2.1"
   },
   "devDependencies": {
     "@babel/core": "~7.9.0"
