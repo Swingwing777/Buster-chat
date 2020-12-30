@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from "@react-native-community/netinfo";
 import { Button, Keyboard } from 'react-native';
+import CustomActions from './CustomActions';
 
 import {
   KeyboardAvoidingView,
@@ -303,6 +304,10 @@ export default class Chat extends Component {
     }
   }
 
+  renderCustomActions(props) {
+    return <CustomActions {...props} />;
+  };
+
   render() {
     let { backGround } = this.state;
     let { /* isConnected, */ loggedInText } = this.state;
@@ -323,14 +328,14 @@ export default class Chat extends Component {
         {/* GiftedChat renders chat progress */}
         <GiftedChat
           renderBubble={this.renderBubble}
-          // Add isConnected state to GiftedChat props
           isConnected={this.state.isConnected}
           renderInputToolbar={this.renderInputToolbar}
           messages={this.state.messages}
           onSend={messages => this.onSend(messages)}
           user={this.state.user}
           renderUsernameOnMessage={true}
-          onLongPress={this.onLongPress}
+          // onLongPress={this.onLongPress}
+          renderActions={this.renderCustomActions}
         />
 
         {/* Cures Android keyboard overlap issue */}
