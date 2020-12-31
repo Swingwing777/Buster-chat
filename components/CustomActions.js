@@ -7,6 +7,7 @@ import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
 import * as Location from 'expo-location';
 import MapView from 'react-native-maps';
+import firebase from "firebase";
 
 export default class CustomActions extends Component {
   // constructor() {
@@ -30,9 +31,9 @@ export default class CustomActions extends Component {
         }).catch(error => console.log(error));
 
         if (!result.cancelled) {
-          this.setState({
-            image: result
-          });
+          // const imageUrl = await this.uploadImage(result.uri);
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
         }
       }
     } catch (error) {
@@ -54,11 +55,9 @@ export default class CustomActions extends Component {
         }).catch((error) => console.log(error));
 
         if (!result.cancelled) {
-          this.setState({
-            image: result
-          });
           // const imageUrlLink = await this.uploadImage(result.uri);
-          // this.props.onSend({ image: imageUrlLink });
+          const imageUrlLink = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrlLink });
         }
       }
     } catch (error) {
@@ -66,26 +65,68 @@ export default class CustomActions extends Component {
     }
   };
 
+  // Method 1 - upload image to Storage with fetch() and blob()
+  uploadImageFetch = async (uri) => {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    const ref = firebase
+      .storage()
+      .ref()
+      .child("myImage");
+
+    const snapshot = await ref.put(blob);
+
+    return await snapshot.ref.getDownloadURL();
+  }
+
+  // Method 2 - upload image to Storage with XMLHttpRequest
+  uploadImage = async (uri) => {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr.response);
+      };
+      xhr.onerror = function (e) {
+        console.log(e);
+        reject(new TypeError('Network request failed'));
+      };
+      xhr.responseType = 'blob';
+      xhr.open('GET', uri, true);
+      xhr.send(null);
+    });
+
+    const ref = firebase
+      .storage()
+      .ref()
+      .child('myImage');
+
+    const snapshot = await ref.put(blob);
+
+    blob.close();
+
+    return await snapshot.ref.getDownloadURL();
+  }
+
   //This requests permission to access location
   getLocation = async () => {
-    try{
-    const { status } = await Permissions.askAsync(Permissions.LOCATION);
-    if (status === 'granted') {
-      let result = await Location.getCurrentPositionAsync({});
+    try {
+      const { status } = await Permissions.askAsync(Permissions.LOCATION);
+      if (status === 'granted') {
+        let result = await Location.getCurrentPositionAsync({});
 
-      if (result) {
-        this.props.onSend({
-          location: {
-            longitude: result.coords.longitude,
-            latitude: result.coords.latitude,
-          },
-        });
+        if (result) {
+          this.props.onSend({
+            location: {
+              longitude: result.coords.longitude,
+              latitude: result.coords.latitude,
+            },
+          });
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
+  };
 
   onActionPress = () => {
     const options = [
