@@ -24,7 +24,9 @@ export default class CustomActions extends Component {
 
       if (status === 'granted') {
         let result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,    // Note: Default setting
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          // Note: Default setting
+          // Other options here
         }).catch(error => console.log(error));
 
         if (!result.cancelled) {
@@ -66,18 +68,24 @@ export default class CustomActions extends Component {
 
   //This requests permission to access location
   getLocation = async () => {
+    try{
     const { status } = await Permissions.askAsync(Permissions.LOCATION);
     if (status === 'granted') {
       let result = await Location.getCurrentPositionAsync({});
 
       if (result) {
-        this.setState({
-          location: result
+        this.props.onSend({
+          location: {
+            longitude: result.coords.longitude,
+            latitude: result.coords.latitude,
+          },
         });
-        console.log(result);
       }
     }
+  } catch (error) {
+    console.log(error);
   }
+};
 
   onActionPress = () => {
     const options = [

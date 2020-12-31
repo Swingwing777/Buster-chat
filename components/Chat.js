@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from "@react-native-community/netinfo";
 import { Button, Keyboard } from 'react-native';
 import CustomActions from './CustomActions';
+import MapView from 'react-native-maps';
 
 import {
   KeyboardAvoidingView,
@@ -32,7 +33,9 @@ export default class Chat extends Component {
         _id: '',
         name: '',
         avatar: '',
-      }
+      },
+      image: null,
+      location: null,
     };
 
     const firebaseConfig = {
@@ -154,6 +157,8 @@ export default class Chat extends Component {
         text: data.text.toString(),
         createdAt: data.createdAt.toDate(),
         user: data.user,
+        image: data.image || "",
+        location: data.location
       });
     });
     this.setState({
@@ -183,7 +188,10 @@ export default class Chat extends Component {
   async saveMessages() {
     try {
       await AsyncStorage
-        .setItem('messages', JSON.stringify(this.state.messages));
+        .setItem(
+          'messages',
+          JSON.stringify(this.state.messages)
+        );
     } catch (error) {
       console.log(error.message);
     }
@@ -210,6 +218,8 @@ export default class Chat extends Component {
       text: message.text || "",
       createdAt: message.createdAt,
       user: message.user,
+      image: message.image || "",
+      location: message.location || null,
       sent: true,
     });
   };
@@ -256,27 +266,6 @@ export default class Chat extends Component {
     );
   }
 
-  // onLongPress(context, message) {
-  //   const { messages } = this.state;
-  //   const options = ['Delete Message', 'Copy Text', 'Cancel'];
-  //   const cancelButtonIndex = options.length - 1;
-  //   context.actionSheet().showActionSheetWithOptions({
-  //     options,
-  //     cancelButtonIndex
-  //   }, (buttonIndex) => {
-  //     switch (buttonIndex) {
-  //       case 0:
-  //         let temp = messages.filter(temp => message._id !== temp._id);
-  //         this.setState({ messages: temp, });
-  //         this.deleteMessageServer(temp);
-  //         break;
-  //       case 1:
-  //         Clipboard.setString(this.props.currentMessage.text);
-  //         break;
-  //     }
-  //   });
-  // }
-
   renderBubble(props) {
     return (
       <Bubble
@@ -308,6 +297,29 @@ export default class Chat extends Component {
     return <CustomActions {...props} />;
   };
 
+  renderCustomView(props) {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{
+            width: 150,
+            height: 100,
+            borderRadius: 13,
+            margin: 3
+          }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
+  }
+
   render() {
     let { backGround } = this.state;
     let { /* isConnected, */ loggedInText } = this.state;
@@ -334,8 +346,8 @@ export default class Chat extends Component {
           onSend={messages => this.onSend(messages)}
           user={this.state.user}
           renderUsernameOnMessage={true}
-          // onLongPress={this.onLongPress}
           renderActions={this.renderCustomActions}
+          renderCustomView={this.renderCustomView}
         />
 
         {/* Cures Android keyboard overlap issue */}
