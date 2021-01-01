@@ -43,7 +43,7 @@ export default class CustomActions extends Component {
     }
   };
 
-  // This requests permission to use camera and take sphoto
+  // This requests permission to use camera and take photo
   takePhoto = async () => {
     try {
       const { status } = await Permissions.askAsync(
@@ -67,13 +67,13 @@ export default class CustomActions extends Component {
     }
   };
 
-  // Method 1 - upload either Gallery or Camera image to Storage with fetch() and blob()
+  // Method 1 - upload Gallery or Camera image to Storage with fetch() and blob()
   uploadImageFetch = async (uri) => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      const getImageName = uri.split("/");   // To split the uri at each "/"
+      const getImageName = uri.split("/");   // To split the uri into array
       const imageFinalString = getImageName[getImageName.length - 1];
       const ref = firebase
         .storage()
@@ -89,7 +89,7 @@ export default class CustomActions extends Component {
     }
   }
 
-  // Method 2 - upload either Gallery or Camera image to Storage with XMLHttpRequest
+  // Method 2 - upload Gallery or Camera image to Storage with XMLHttpRequest
   uploadImage = async (uri) => {
     try {
       const blob = await new Promise((resolve, reject) => {
@@ -106,7 +106,7 @@ export default class CustomActions extends Component {
         xhr.send(null);
       });
 
-      const getImageName = uri.split("/");   // To split the uri at the first "/"
+      const getImageName = uri.split("/");   // To split the uri into array
       const imageFinalString = getImageName[getImageName.length - 1];
       const ref = firebase
         .storage()
