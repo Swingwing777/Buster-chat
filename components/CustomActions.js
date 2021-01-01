@@ -81,7 +81,7 @@ export default class CustomActions extends Component {
         .child(`images/${imageFinalString}`);
 
       const snapshot = await ref.put(blob);
-      
+
       const imageURL = await snapshot.ref.getDownloadURL();
       return imageURL;
     } catch (error) {
@@ -185,7 +185,11 @@ export default class CustomActions extends Component {
         style={[styles.container]}
         onPress={this.onActionPress}>
         <View style={[styles.wrapper, this.props.wrapperStyle]}>
-          <Text style={[styles.iconText, this.props.iconTextStyle]}>+</Text>
+          <Text
+            style={[styles.iconText, this.props.iconTextStyle]}
+            accessibilityLabel='Message Options'
+            accessibilityRole='menu'
+          >+</Text>
         </View>
       </TouchableOpacity>
     );
