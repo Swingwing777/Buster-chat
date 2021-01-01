@@ -1,13 +1,15 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View, LogBox } from 'react-native';
 
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
 import * as Location from 'expo-location';
-import MapView from 'react-native-maps';
 import firebase from "firebase";
+
+// Ignore all log notifications:
+LogBox.ignoreAllLogs();
 
 export default class CustomActions extends Component {
   // constructor() {
@@ -56,8 +58,8 @@ export default class CustomActions extends Component {
 
         if (!result.cancelled) {
           // const imageUrlLink = await this.uploadImage(result.uri);
-          const imageUrlLink = await this.uploadImageFetch(result.uri);
-          this.props.onSend({ image: imageUrlLink });
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
         }
       }
     } catch (error) {
@@ -65,47 +67,62 @@ export default class CustomActions extends Component {
     }
   };
 
-  // Method 1 - upload image to Storage with fetch() and blob()
+  // Method 1 - upload either Gallery or Camera image to Storage with fetch() and blob()
   uploadImageFetch = async (uri) => {
-    const response = await fetch(uri);
-    const blob = await response.blob();
-    const ref = firebase
-      .storage()
-      .ref()
-      .child("myImage");
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
 
-    const snapshot = await ref.put(blob);
+      const getImageName = uri.split("/");   // To split the uri at each "/"
+      const imageFinalString = getImageName[getImageName.length - 1];
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(`images/${imageFinalString}`);
 
-    return await snapshot.ref.getDownloadURL();
+      const snapshot = await ref.put(blob);
+      
+      const imageURL = await snapshot.ref.getDownloadURL();
+      return imageURL;
+    } catch (error) {
+      console.log(error);
+    }
   }
 
-  // Method 2 - upload image to Storage with XMLHttpRequest
+  // Method 2 - upload either Gallery or Camera image to Storage with XMLHttpRequest
   uploadImage = async (uri) => {
-    const blob = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = function () {
-        resolve(xhr.response);
-      };
-      xhr.onerror = function (e) {
-        console.log(e);
-        reject(new TypeError('Network request failed'));
-      };
-      xhr.responseType = 'blob';
-      xhr.open('GET', uri, true);
-      xhr.send(null);
-    });
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+          console.log(e);
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', uri, true);
+        xhr.send(null);
+      });
 
-    const ref = firebase
-      .storage()
-      .ref()
-      .child('myImage');
+      const getImageName = uri.split("/");   // To split the uri at the first "/"
+      const imageFinalString = getImageName[getImageName.length - 1];
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(`images/${imageFinalString}`);
 
-    const snapshot = await ref.put(blob);
+      const snapshot = await ref.put(blob);
 
-    blob.close();
+      blob.close();
 
-    return await snapshot.ref.getDownloadURL();
-  }
+      const imageURL = await snapshot.ref.getDownloadURL();
+      return imageURL;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   //This requests permission to access location
   getLocation = async () => {
@@ -149,7 +166,7 @@ export default class CustomActions extends Component {
             return;
           case 1:
             console.log('user wants to take a photo');
-            this.takePhoto()
+            this.takePhoto();
             return;
           case 2:
             console.log('user wants to get their location');
@@ -200,56 +217,3 @@ const styles = StyleSheet.create({
 CustomActions.contextTypes = {
   actionSheet: PropTypes.func,
 };
-
-
-// Additional rendering from experiement project..........................
-
-  // <View style={{ flex: 1, justifyContent: 'center' }}>
-      //   <Text>{statusMessage}</Text>
-      //   <Text>{playMessage}</Text>
-      //   <Button
-      //     title="Pick an image from the library"
-      //     onPress={this.pickImage}
-      //   />
-
-      //   <Button
-      //     title="Take a photo"
-      //     onPress={this.takePhoto}
-      //   />
-
-      //   <Button
-      //     title={recording ? 'Stop Recording' : 'Start Recording'}
-      //     onPress={recording ? this.stopRecording : this.startRecording}
-      //   />
-
-      //   <Button
-      //     title="Play Audio"
-      //     onPress={this.playSound}
-      //   />
-      //   <Text>{uri}</Text>
-
-      //   <Button
-      //     title="Get my location"
-      //     onPress={this.getLocation}
-      //   />
-
-      //   {/* Nothing renders unless both are true */}
-      //   {this.state.image &&
-      //     <Image
-      //       source={{ uri: this.state.image.uri }}
-      //       style={{ width: 200, height: 200 }}
-      //     />
-      //   }
-
-      //   {/* Nothing renders unless both are true */}
-      //   {this.state.location &&
-      //     <MapView
-      //       style={{ width: 300, height: 200 }}
-      //       region={{
-      //         latitude: this.state.location.coords.latitude,
-      //         longitude: this.state.location.coords.longitude,
-      //         latitudeDelta: 0.0922,
-      //         longitudeDelta: 0.0421,
-      //       }}
-      //     />}
-      // </View>
