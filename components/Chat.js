@@ -61,7 +61,6 @@ export default class Chat extends Component {
 
   componentDidMount() {
     let { name, backGround } = this.props.route.params;
-    //let isConnected = this.state.isConnected;
 
     /* Set a default username for title area 
     if the user does not enter one */
@@ -161,6 +160,8 @@ export default class Chat extends Component {
         location: data.location
       });
     });
+    /* Caution: deliberate use of arrow function syntax binds this. 
+    to the parent scope (ie Component), rather than to onCollectionUpdate() */
     this.setState({
       messages,
     });
@@ -172,7 +173,7 @@ export default class Chat extends Component {
   };
 
   // To update messages from local storage
-  async getMessages() {
+  getMessages = async () => {
     let messages = '';
     try {
       messages = await AsyncStorage.getItem('messages') || [];
@@ -185,7 +186,7 @@ export default class Chat extends Component {
   };
 
   // To save messages state to local storage as 'messages' key 
-  async saveMessages() {
+  saveMessages = async () => {
     try {
       await AsyncStorage
         .setItem(
@@ -198,7 +199,7 @@ export default class Chat extends Component {
   }
 
   // To delete the locally stored 'messages' key
-  async deleteMessages() {
+  deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
       this.setState({
@@ -225,7 +226,7 @@ export default class Chat extends Component {
   };
 
   // Developer use - Clears Firestore, leaves placeholder to maintain collection
-  async deleteMessagesFirestore(error) {
+  deleteMessagesFirestore = async () => {
     collectionPlaceholder =
     {
       _id: 1,
@@ -239,18 +240,22 @@ export default class Chat extends Component {
       },
       sent: true,
     }
-    this.referenceMessages.get()
-      .then(res => {
-        res.forEach(doc => {
-          doc.ref.delete();
+    try {
+      this.referenceMessages.get()
+        .then(res => {
+          res.forEach(doc => {
+            doc.ref.delete();
+          })
+          this.referenceMessages.add(collectionPlaceholder);
         })
-        this.referenceMessages.add(collectionPlaceholder);
-      })
-      .catch(error);
-  }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Adds new message to preceding messages state & returns new messages state
-  onSend(messages = []) {
+  // ES6 syntax with default function parameter
+  onSend = (messages = []) => {
     this.setState(
       (previousState) => ({
         messages: GiftedChat.append(previousState.messages, messages),
@@ -266,7 +271,7 @@ export default class Chat extends Component {
     );
   }
 
-  renderBubble(props) {
+  renderBubble = (props) => {
     return (
       <Bubble
         {...props}
@@ -282,7 +287,7 @@ export default class Chat extends Component {
   }
 
   // To render message toolbar only if user is online
-  renderInputToolbar(props) {
+  renderInputToolbar = (props) => {
     if (props.isConnected == false) {
     } else {
       return (
@@ -293,11 +298,11 @@ export default class Chat extends Component {
     }
   }
 
-  renderCustomActions(props) {
+  renderCustomActions = (props) => {
     return <CustomActions {...props} />;
   };
 
-  renderCustomView(props) {
+  renderCustomView = (props) => {
     const { currentMessage } = props;
     if (currentMessage.location) {
       return (
@@ -333,9 +338,6 @@ export default class Chat extends Component {
         }}
       >
         <Text>{loggedInText}</Text>
-
-        {/* Tempo render - to test isConnected state */}
-        {/* <Text>isConnected state is: {isConnected.toString()}</Text> */}
 
         {/* GiftedChat renders chat progress */}
         <GiftedChat

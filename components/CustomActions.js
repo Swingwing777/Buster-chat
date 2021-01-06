@@ -12,12 +12,6 @@ import firebase from "firebase";
 LogBox.ignoreAllLogs();
 
 export default class CustomActions extends Component {
-  // constructor() {
-  //   super();
-  // }
-
-  // state = {
-  // }
 
   // This requests permission to access media and pick image
   pickImage = async () => {
@@ -159,20 +153,24 @@ export default class CustomActions extends Component {
         cancelButtonIndex,
       },
       async (buttonIndex) => {
-        switch (buttonIndex) {
-          case 0:
-            console.log('user wants to pick an image');
-            this.pickImage();
-            return;
-          case 1:
-            console.log('user wants to take a photo');
-            this.takePhoto();
-            return;
-          case 2:
-            console.log('user wants to get their location');
-            this.getLocation();
-            return;
-          default:                     // What is default for?
+        try {
+          switch (buttonIndex) {
+            case 0:
+              console.log('user wants to pick an image');
+              this.pickImage();
+              return;
+            case 1:
+              console.log('user wants to take a photo');
+              this.takePhoto();
+              return;
+            case 2:
+              console.log('user wants to get their location');
+              this.getLocation();
+              return;
+            default:
+          }
+        } catch (error) {
+          console.log(error)
         }
       },
     );
