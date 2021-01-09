@@ -8,6 +8,7 @@ npm-debug.*
 *.mobileprovision
 *.orig.*
 web-build/
+firestore_rules.js
 
 # macOS
 .DS_Store
