@@ -1,17 +1,15 @@
 import React from 'react';
 
-// import the screens
+// import views
 import Start from './components/Start';
 import Chat from './components/Chat';
 
-// import react native gesture handler
+// import react native gesture handler and dependencies
 import 'react-native-gesture-handler';
-
-// import react Navigation
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
-// Create the navigator
+// Create navigator stack to handle view-to-view transitions
 const Stack = createStackNavigator();
 
 export default class App extends React.Component {

@@ -48,8 +48,7 @@ export default class Chat extends Component {
       measurementId: "G-CEKYF200N3"
     }
 
-    /* Firebase initialization must come before
-     any Firebase requests */
+    // Firebase initialization must occur before any Firebase requests
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
@@ -62,11 +61,10 @@ export default class Chat extends Component {
   componentDidMount() {
     let { name, backGround } = this.props.route.params;
 
-    /* Set a default username for title area 
-    if the user does not enter one */
+    // Default username for title area if user does not enter one
     if (!name || name === '') name = 'User';
 
-    // create login system message
+    // For login system message
     this.id = uuidv4();
 
     // Displays desired background and username in the navbar
@@ -80,6 +78,7 @@ export default class Chat extends Component {
     // Always want to retrieve chat messages from asyncStorage
     this.getMessages();
 
+    // Checks if user online
     NetInfo.fetch().then((connection) => {
       if (connection.isConnected) {
 
@@ -117,7 +116,7 @@ export default class Chat extends Component {
             });
 
             this.unsubscribe = this.referenceMessages
-              // Order by ensures correct chronological order
+              // orderBy ensures correct chronological order
               .orderBy("createdAt", "desc")
               .onSnapshot(this.onCollectionUpdate);
           });
@@ -140,17 +139,19 @@ export default class Chat extends Component {
     }
   }
 
+  /** onCollectionUpdate queries the 
+   * Firestore messages collection.
+   * Note: arrow syntax binds 'this'
+   * to the parent scope (ie Component), 
+   * rather than to onCollectionUpdate() 
+   */
   onCollectionUpdate = (querySnapshot) => {
-    /* Use [] instead of this.state.messages to 
-    avoid message duplication */
     const messages = [];
 
-    // go through each document
     querySnapshot.forEach((doc) => {
-      // get the QueryDocumentSnapshot's data
       const data = doc.data();
 
-      // Format to match GiftedChat format
+      // message format to match GiftedChat format
       messages.push({
         _id: data._id,
         text: data.text.toString(),
@@ -160,8 +161,7 @@ export default class Chat extends Component {
         location: data.location
       });
     });
-    /* Caution: deliberate use of arrow function syntax binds this. 
-    to the parent scope (ie Component), rather than to onCollectionUpdate() */
+
     this.setState({
       messages,
     });
@@ -172,7 +172,10 @@ export default class Chat extends Component {
     }
   };
 
-  // To update messages from local storage
+  /** getMessages retrieves locally
+   * held messages from asyncStorager 
+   * for offline viewing.
+   */
   getMessages = async () => {
     let messages = '';
     try {
@@ -185,7 +188,9 @@ export default class Chat extends Component {
     }
   };
 
-  // To save messages state to local storage as 'messages' key 
+  /** saveMessages saves the 'messages'
+   * state to local asyncStorage.
+   */
   saveMessages = async () => {
     try {
       await AsyncStorage
@@ -198,21 +203,10 @@ export default class Chat extends Component {
     }
   }
 
-  // To delete the locally stored 'messages' key
-  deleteMessages = async () => {
-    try {
-      await AsyncStorage.removeItem('messages');
-      this.setState({
-        messages: []
-      })
-    } catch (error) {
-      console.log(error.message);
-    }
-  }
-
-  // Messages added to Firestore from state
+  /** addMessages adds newest message
+ * from 'messages' state to Firestore.
+ */
   addMessages = () => {
-    // Find the newest (ie first ) message of messages state 
     const message = this.state.messages[0];
     this.referenceMessages.add({
       _id: message._id,
@@ -225,7 +219,24 @@ export default class Chat extends Component {
     });
   };
 
-  // Developer use - Clears Firestore, leaves placeholder to maintain collection
+  /** For Developer use - deletes the
+   * 'messages' key from local Storage.
+   */
+  deleteMessages = async () => {
+    try {
+      await AsyncStorage.removeItem('messages');
+      this.setState({
+        messages: []
+      })
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
+
+  /** For Developer use - Clears Firestore
+   * and leaves placeholder message
+   * to maintain collection.
+   */
   deleteMessagesFirestore = async () => {
     collectionPlaceholder =
     {
@@ -236,7 +247,6 @@ export default class Chat extends Component {
         _id: 1,
         name: 'Creator',
         avatar: "https://sweepback.co.uk/img/creator.jpg",
-        // avatar: '../assets/creator.jpg',
       },
       sent: true,
     }
@@ -253,8 +263,10 @@ export default class Chat extends Component {
     }
   };
 
-  // Adds new message to preceding messages state & returns new messages state
-  // ES6 syntax with default function parameter
+  /** onSend adds each new message to preceding
+   * messages state and returns new messages state, 
+   * triggering re-render.
+   */
   onSend = (messages = []) => {
     this.setState(
       (previousState) => ({
@@ -262,15 +274,15 @@ export default class Chat extends Component {
       }),
       () => {
         this.addMessages();
-
-        // Call function to save to local storage
         this.saveMessages();
-        // Hide keyboard after message sent
         Keyboard.dismiss();
       }
     );
   }
 
+  /** renderBubble enables bespoke styling
+   *  to adjust default GiftedChat styling
+   */
   renderBubble = (props) => {
     return (
       <Bubble
@@ -286,7 +298,9 @@ export default class Chat extends Component {
     )
   }
 
-  // To render message toolbar only if user is online
+  /** renderInputToolbar renders the
+   * input toolbar only if the user is online
+   */
   renderInputToolbar = (props) => {
     if (props.isConnected == false) {
     } else {
@@ -298,10 +312,17 @@ export default class Chat extends Component {
     }
   }
 
+  /** renderCustomActions renders the
+   * custom actions icon & hidden list
+   * of user options within input toolbar
+   */
   renderCustomActions = (props) => {
     return <CustomActions {...props} />;
   };
 
+  /** renderCustomView renders a Google map image
+   * to display shared location.
+   */
   renderCustomView = (props) => {
     const { currentMessage } = props;
     if (currentMessage.location) {
@@ -327,12 +348,12 @@ export default class Chat extends Component {
 
   render() {
     let { backGround } = this.state;
-    let { /* isConnected, */ loggedInText } = this.state;
+    let { loggedInText } = this.state;
     return (
 
       <View
-        // Flex: 1 prop essential to ensure View fills entire available space
         style={{
+          // flex: 1 essential to fill all available space
           flex: 1,
           backgroundColor: backGround
         }}
@@ -358,7 +379,7 @@ export default class Chat extends Component {
           : null
         }
 
-        {/* Development use only */}
+        {/* Development use only - comment out block for production */}
         <Button
           title='Dev Use: Delete Local/Remote'
           accessibilityLabel='Developer delete messages'

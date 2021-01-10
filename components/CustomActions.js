@@ -13,22 +13,19 @@ LogBox.ignoreAllLogs();
 
 export default class CustomActions extends Component {
 
-  // This requests permission to access media and pick image
+  // Requests permission to access media
   pickImage = async () => {
     try {
-      // alias for Permissions.askAsync(Permissions.CAMERA_ROLL)
       const { status } = await MediaLibrary.requestPermissionsAsync();
 
       if (status === 'granted') {
         let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          // Note: Default setting
-          // Other options here
         }).catch(error => console.log(error));
 
         if (!result.cancelled) {
-          // const imageUrl = await this.uploadImage(result.uri);
-          const imageUrl = await this.uploadImageFetch(result.uri);
+          const imageUrl = await this.uploadImageFetch(result.uri);  // Method 1
+          // const imageUrl = await this.uploadImage(result.uri);    // Method 2
           this.props.onSend({ image: imageUrl });
         }
       }
@@ -37,7 +34,7 @@ export default class CustomActions extends Component {
     }
   };
 
-  // This requests permission to use camera and take photo
+  // Requests permission to use camera; then takes photo
   takePhoto = async () => {
     try {
       const { status } = await Permissions.askAsync(
@@ -67,7 +64,7 @@ export default class CustomActions extends Component {
       const response = await fetch(uri);
       const blob = await response.blob();
 
-      const getImageName = uri.split("/");   // To split the uri into array
+      const getImageName = uri.split("/");       // To split the uri into array of strings
       const imageFinalString = getImageName[getImageName.length - 1];
       const ref = firebase
         .storage()
@@ -100,7 +97,7 @@ export default class CustomActions extends Component {
         xhr.send(null);
       });
 
-      const getImageName = uri.split("/");   // To split the uri into array
+      const getImageName = uri.split("/");         // To split the uri into array of strings
       const imageFinalString = getImageName[getImageName.length - 1];
       const ref = firebase
         .storage()
@@ -118,7 +115,7 @@ export default class CustomActions extends Component {
     }
   };
 
-  //This requests permission to access location
+  // Request permission to access device location
   getLocation = async () => {
     try {
       const { status } = await Permissions.askAsync(Permissions.LOCATION);
@@ -156,15 +153,15 @@ export default class CustomActions extends Component {
         try {
           switch (buttonIndex) {
             case 0:
-              console.log('user wants to pick an image');
+              // console.log('user wants to pick an image');
               this.pickImage();
               return;
             case 1:
-              console.log('user wants to take a photo');
+              // console.log('user wants to take a photo');
               this.takePhoto();
               return;
             case 2:
-              console.log('user wants to get their location');
+              // console.log('user wants to get their location');
               this.getLocation();
               return;
             default:
@@ -177,7 +174,6 @@ export default class CustomActions extends Component {
   };
 
   render() {
-    // const { statusMessage, recording, uri, playMessage } = this.state;
     return (
       <TouchableOpacity
         style={[styles.container]}

@@ -25,10 +25,10 @@ export default class Start extends Component {
   render() {
 
     /**
-   * TextInput sets the user's name
-   * TouchableOpacity elements set the background color for the next screen
-   * and allow bespoke styling
-   */
+    * TextInput sets the user's name;
+    * TouchableOpacity elements set the background 
+    * color for the next screen.
+    */
 
     return (
       <View style={styles.container}>
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
   },
   image: {
-    flex: 1,   // to cover screen
+    flex: 1,                          // To fill full space
     resizeMode: "cover",
     justifyContent: "space-between",  // Top-bottom distribution
     alignItems: "center"              // Left-right alignment
