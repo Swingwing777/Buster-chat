@@ -12,6 +12,12 @@ import Chat from './components/Chat';
 // Create navigator stack to handle view-to-view transitions
 const Stack = createStackNavigator();
 
+/**
+ * ##### Creates a new function component:
+ * - This is the root file and contains
+ * the navigation stack.
+ * @class App
+ */
 export default function App() {
   return (
     <NavigationContainer>

@@ -28,37 +28,52 @@
         <article>
             <pre class="prettyprint source linenums"><code>import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View, LogBox } from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  LogBox,
+} from 'react-native';
 
 import * as ImagePicker from 'expo-image-picker';
 import * as Permissions from 'expo-permissions';
 import * as MediaLibrary from 'expo-media-library';
 import * as Location from 'expo-location';
-import firebase from "firebase";
+import firebase from 'firebase';
 
 // Ignore all log notifications:
 LogBox.ignoreAllLogs();
 
+/**
+ * ##### Creates a new Class component:
+ * - to control user-selectable actions
+ * @class CustomActions
+ */
 export default class CustomActions extends Component {
-
   /**
-   * Requests permission to access device media gallery
-   * @function pickImage
+   * ##### Purpose:
+   * - Requests permission to access device media
+   *  gallery to pick image.
    * @async
+   * @function pickImage
+   * @param {*} props onSend
+   * @param {*} props status
    */
   pickImage = async () => {
     try {
+      const { onSend } = this.props;
       const { status } = await MediaLibrary.requestPermissionsAsync();
 
       if (status === 'granted') {
-        let result = await ImagePicker.launchImageLibraryAsync({
+        const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        }).catch(error => console.log(error));
+        }).catch((error) => console.log(error));
 
         if (!result.cancelled) {
-          const imageUrl = await this.uploadImageFetch(result.uri);  // Method 1
-          // const imageUrl = await this.uploadImage(result.uri);    // Method 2
-          this.props.onSend({ image: imageUrl });
+          const imageUrl = await this.uploadImageFetch(result.uri); // Method 1
+          // const imageUrl = await this.uploadImage(result.uri);   // Method 2
+          onSend({ image: imageUrl });
         }
       }
     } catch (error) {
@@ -67,19 +82,22 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Requests permission to use camera; then takes photo.
-   * @function takePhoto
+   * ##### Purpose:
+   * - Requests permission to use camera; then takes photo.
    * @async
-   * @deprecated CAMERA_ROLL
+   * @function takePhoto
+   * @param {*} props onSend
+   * @param {*} props status
    */
   takePhoto = async () => {
     try {
+      const { onSend } = this.props;
       const { status } = await Permissions.askAsync(
         Permissions.CAMERA,
-        Permissions.CAMERA_ROLL
+        Permissions.CAMERA_ROLL,
       );
 
-      if (status === "granted") {
+      if (status === 'granted') {
         const result = await ImagePicker.launchCameraAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.Images,
         }).catch((error) => console.log(error));
@@ -87,7 +105,7 @@ export default class CustomActions extends Component {
         if (!result.cancelled) {
           // const imageUrlLink = await this.uploadImage(result.uri);
           const imageUrl = await this.uploadImageFetch(result.uri);
-          this.props.onSend({ image: imageUrl });
+          onSend({ image: imageUrl });
         }
       }
     } catch (error) {
@@ -95,26 +113,27 @@ export default class CustomActions extends Component {
     }
   };
 
-  /** 
-   * Method 1 - upload Gallery or Camera image to
-   * Storage with fetch() and blob().
+  /**
+   * ##### Method 1 - Fetch:
+   * - Upload Gallery or Camera image to
+   * storage with fetch() and blob().
    * @function uploadImagefetch
    * @async
+   * @param {string} uri
+   * @returns {string} imageURL
   */
+  // eslint-disable-next-line consistent-return
   uploadImageFetch = async (uri) => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-
-      const getImageName = uri.split("/");       // To split the uri into array of strings
+      const getImageName = uri.split('/'); // To split the uri into array of strings
       const imageFinalString = getImageName[getImageName.length - 1];
       const ref = firebase
         .storage()
         .ref()
         .child(`images/${imageFinalString}`);
-
       const snapshot = await ref.put(blob);
-
       const imageURL = await snapshot.ref.getDownloadURL();
       return imageURL;
     } catch (error) {
@@ -123,19 +142,22 @@ export default class CustomActions extends Component {
   }
 
   /**
-   * Method 2 - [Alternative] upload Gallery or 
-   * Camera image to Storage with XMLHttpRequest.
+   * ##### Method 2 - XMLHttpRequest:
+   * - Upload Gallery or Camera image
+   *  to Storage with XMLHttpRequest and blob().
    * @function uploadImage
    * @async
+   * @param {string} uri
+   * @returns {string} imageURL
    */
   uploadImage = async (uri) => {
     try {
       const blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.onload = function () {
+        xhr.onload = function res() {
           resolve(xhr.response);
         };
-        xhr.onerror = function (e) {
+        xhr.onerror = function rej(e) {
           console.log(e);
           reject(new TypeError('Network request failed'));
         };
@@ -144,7 +166,7 @@ export default class CustomActions extends Component {
         xhr.send(null);
       });
 
-      const getImageName = uri.split("/");         // To split the uri into array of strings
+      const getImageName = uri.split('/'); // To split the uri into array of strings
       const imageFinalString = getImageName[getImageName.length - 1];
       const ref = firebase
         .storage()
@@ -163,18 +185,24 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Request permission to access device location
-   * @function getLocation
+   * ##### Purpose:
+   * - Requests permission to access device location,
+   * then sends location via onSend.
    * @async
+   * @function getLocation
+   * @param {*} props onSend
+   * @param {*} props status
+   * @returns {Promise} Location data
    */
   getLocation = async () => {
     try {
+      const { onSend } = this.props;
       const { status } = await Permissions.askAsync(Permissions.LOCATION);
       if (status === 'granted') {
-        let result = await Location.getCurrentPositionAsync({});
+        const result = await Location.getCurrentPositionAsync({});
 
         if (result) {
-          this.props.onSend({
+          onSend({
             location: {
               longitude: result.coords.longitude,
               latitude: result.coords.latitude,
@@ -188,19 +216,22 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Renders and reveals custom actions.
-   * @function onActionPress
+   * ##### Purpose:
+   * - Renders and reveals custom actions.
    * @async
+   * @function onActionPress
+   * @returns {actionSheet}
    */
   onActionPress = () => {
     const options = [
       'Choose From Library',
       'Take Picture',
       'Send Location',
-      'Cancel'
+      'Cancel',
     ];
+    const { actionSheet } = this.context;
     const cancelButtonIndex = options.length - 1;
-    this.context.actionSheet().showActionSheetWithOptions(
+    actionSheet().showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
@@ -223,23 +254,27 @@ export default class CustomActions extends Component {
             default:
           }
         } catch (error) {
-          console.log(error)
+          console.log(error);
         }
       },
     );
   };
 
   render() {
+    const { wrapperStyle, iconTextStyle } = this.props;
     return (
       &lt;TouchableOpacity
         style={[styles.container]}
-        onPress={this.onActionPress}>
-        &lt;View style={[styles.wrapper, this.props.wrapperStyle]}>
+        onPress={this.onActionPress}
+      >
+        &lt;View style={[styles.wrapper, wrapperStyle]}>
           &lt;Text
-            style={[styles.iconText, this.props.iconTextStyle]}
-            accessibilityLabel='Message Options'
-            accessibilityRole='menu'
-          >+&lt;/Text>
+            style={[styles.iconText, iconTextStyle]}
+            accessibilityLabel="Message Options"
+            accessibilityRole="menu"
+          >
+            +
+          &lt;/Text>
         &lt;/View>
       &lt;/TouchableOpacity>
     );
@@ -271,6 +306,18 @@ const styles = StyleSheet.create({
 CustomActions.contextTypes = {
   actionSheet: PropTypes.func,
 };
+
+CustomActions.defaultProps = {
+  onSend: PropTypes.func,
+  wrapperStyle: PropTypes.func,
+  iconTextStyle: PropTypes.func,
+};
+
+CustomActions.propTypes = {
+  onSend: PropTypes.func,
+  wrapperStyle: PropTypes.func,
+  iconTextStyle: PropTypes.func,
+};
 </code></pre>
         </article>
     </section>
@@ -281,13 +328,13 @@ CustomActions.contextTypes = {
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Chat.html">Chat</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addMessages">addMessages</a></li><li><a href="global.html#componentDidMount">componentDidMount</a></li><li><a href="global.html#componentWillUnmount">componentWillUnmount</a></li><li><a href="global.html#deleteMessages">deleteMessages</a></li><li><a href="global.html#deleteMessagesFirestore">deleteMessagesFirestore</a></li><li><a href="global.html#getLocation">getLocation</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#onActionPress">onActionPress</a></li><li><a href="global.html#onCollectionUpdate">onCollectionUpdate</a></li><li><a href="global.html#onSend">onSend</a></li><li><a href="global.html#pickImage">pickImage</a></li><li><a href="global.html#renderBubble">renderBubble</a></li><li><a href="global.html#renderCustomActions">renderCustomActions</a></li><li><a href="global.html#renderCustomView">renderCustomView</a></li><li><a href="global.html#renderInputToolbar">renderInputToolbar</a></li><li><a href="global.html#saveMessages">saveMessages</a></li><li><a href="global.html#takePhoto">takePhoto</a></li><li><a href="global.html#uploadImage">uploadImage</a></li><li><a href="global.html#uploadImagefetch">uploadImagefetch</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Chat.html">Chat</a></li><li><a href="CustomActions.html">CustomActions</a></li><li><a href="Start.html">Start</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addMessages">addMessages</a></li><li><a href="global.html#componentDidMount">componentDidMount</a></li><li><a href="global.html#componentWillUnmount">componentWillUnmount</a></li><li><a href="global.html#deleteMessages">deleteMessages</a></li><li><a href="global.html#deleteMessagesFirestore">deleteMessagesFirestore</a></li><li><a href="global.html#getLocation">getLocation</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#onActionPress">onActionPress</a></li><li><a href="global.html#onCollectionUpdate">onCollectionUpdate</a></li><li><a href="global.html#onSend">onSend</a></li><li><a href="global.html#pickImage">pickImage</a></li><li><a href="global.html#renderBubble">renderBubble</a></li><li><a href="global.html#renderCustomActions">renderCustomActions</a></li><li><a href="global.html#renderCustomView">renderCustomView</a></li><li><a href="global.html#renderInputToolbar">renderInputToolbar</a></li><li><a href="global.html#saveMessages">saveMessages</a></li><li><a href="global.html#takePhoto">takePhoto</a></li><li><a href="global.html#uploadImage">uploadImage</a></li><li><a href="global.html#uploadImagefetch">uploadImagefetch</a></li></ul>
 </nav>
 
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 19:33:41 GMT+0400 (Gulf Standard Time)
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Mon Jan 11 2021 15:04:25 GMT+0400 (Gulf Standard Time)
 </footer>
 
 <script> prettyPrint(); </script>

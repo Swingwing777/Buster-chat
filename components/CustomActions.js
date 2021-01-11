@@ -17,11 +17,20 @@ import firebase from 'firebase';
 // Ignore all log notifications:
 LogBox.ignoreAllLogs();
 
+/**
+ * ##### Creates a new Class component:
+ * - to control user-selectable actions
+ * @class CustomActions
+ */
 export default class CustomActions extends Component {
   /**
-   * Requests permission to access device media gallery
-   * @function pickImage
+   * ##### Purpose:
+   * - Requests permission to access device media
+   *  gallery to pick image.
    * @async
+   * @function pickImage
+   * @param {*} props onSend
+   * @param {*} props status
    */
   pickImage = async () => {
     try {
@@ -45,9 +54,12 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Requests permission to use camera; then takes photo.
-   * @function takePhoto
+   * ##### Purpose:
+   * - Requests permission to use camera; then takes photo.
    * @async
+   * @function takePhoto
+   * @param {*} props onSend
+   * @param {*} props status
    */
   takePhoto = async () => {
     try {
@@ -74,10 +86,13 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Method 1 - upload Gallery or Camera image to
-   * Storage with fetch() and blob().
+   * ##### Method 1 - Fetch:
+   * - Upload Gallery or Camera image to
+   * storage with fetch() and blob().
    * @function uploadImagefetch
    * @async
+   * @param {string} uri
+   * @returns {string} imageURL
   */
   // eslint-disable-next-line consistent-return
   uploadImageFetch = async (uri) => {
@@ -99,10 +114,13 @@ export default class CustomActions extends Component {
   }
 
   /**
-   * Method 2 - [Alternative] upload Gallery or
-   * Camera image to Storage with XMLHttpRequest.
+   * ##### Method 2 - XMLHttpRequest:
+   * - Upload Gallery or Camera image
+   *  to Storage with XMLHttpRequest and blob().
    * @function uploadImage
    * @async
+   * @param {string} uri
+   * @returns {string} imageURL
    */
   uploadImage = async (uri) => {
     try {
@@ -139,9 +157,14 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Request permission to access device location
-   * @function getLocation
+   * ##### Purpose:
+   * - Requests permission to access device location,
+   * then sends location via onSend.
    * @async
+   * @function getLocation
+   * @param {*} props onSend
+   * @param {*} props status
+   * @returns {Promise} Location data
    */
   getLocation = async () => {
     try {
@@ -165,9 +188,11 @@ export default class CustomActions extends Component {
   };
 
   /**
-   * Renders and reveals custom actions.
-   * @function onActionPress
+   * ##### Purpose:
+   * - Renders and reveals custom actions.
    * @async
+   * @function onActionPress
+   * @returns {actionSheet}
    */
   onActionPress = () => {
     const options = [

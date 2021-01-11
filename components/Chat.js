@@ -19,7 +19,8 @@ import MapView from 'react-native-maps';
 import CustomActions from './CustomActions';
 
 /**
- * Creates a new Class component
+ * ##### Creates a new Class component:
+ * - to render the chat view
  * @class Chat
  */
 export default class Chat extends Component {
@@ -57,17 +58,20 @@ export default class Chat extends Component {
   }
 
   /**
-   * Sets the user choices,
-   * gets the local message store
-   * authenticates the user,
-   * displays system message and
-   * sets initial states.
+   * ###### Sets the following:
+   * - user choices,
+   * - gets the local message store,
+   * - authenticates the user,
+   * - displays system message, and
+   * - sets initial states.
    * @function componentDidMount
-   * @state isConnected
-   * @state user
-   * @state loggedInText
-   * @state messages
-   *
+   * @param {state} isConnected
+   * @param {state} user
+   * @param {state} loggedInText
+   * @param {state} messages
+   * @param {Object} route props from App
+   * @param {Object} navigation props from Start
+   * @returns {state} user, isConnected, loggedInText, messages
    */
   componentDidMount() {
     const { route, navigation } = this.props;
@@ -144,9 +148,11 @@ export default class Chat extends Component {
   }
 
   /**
-   * Unsubscribes from Firestore
-   * and cancels user autherisation.
+   * ###### Purpose:
+   * - Unsubscribes from Firestore.
+   * - Cancels user authorisation.
    * @function componentWillUnmount
+   * @param {state} isConnected
    */
   componentWillUnmount() {
     const { isConnected } = this.state;
@@ -157,14 +163,20 @@ export default class Chat extends Component {
   }
 
   /**
-   * Query the Firestore messages collection.
-   * Note: arrow syntax binds 'this'
+   * ###### Purpose:
+   * - Query the Firestore messages collection.
+   * - *Note*: arrow syntax binds 'this'
    * to the parent scope (ie Component),
    * rather than to onCollectionUpdate()
    * @function onCollectionUpdate
-   * @param {array} messages
-   * @return {state} messages
-   *
+   * @param {Object[]} messages collection
+   * @param {string} messages[]._id - message id
+   * @param {string} messages[].text - content
+   * @param {date} messages[].createdAt - DTG message sent
+   * @param {string} messages[].user - user data
+   * @param {string} messages[].image - image sent
+   * @param {number} messages[].location - GPS coordinates
+   * @returns {state} messages
    */
   onCollectionUpdate = (querySnapshot) => {
     const messages = [];
@@ -194,11 +206,14 @@ export default class Chat extends Component {
   };
 
   /**
-   * Retrieves locally
-   * held messages from asyncStorager
+   * ###### Purpose:
+   * - Retrieves locally-held
+   * messages from asyncStorage
    * for offline viewing.
-   * @function getMessages
    * @async
+   * @function getMessages
+   * @params {string} messages
+   * @returns {state} messages
    */
   getMessages = async () => {
     let messages = '';
@@ -213,10 +228,13 @@ export default class Chat extends Component {
   };
 
   /**
-   * Saves the 'messages'
+   * ###### Purpose:
+   * - Saves the 'messages'
    * state to local asyncStorage.
-   * @function saveMessages
    * @async
+   * @function saveMessages
+   * @params {state} messages
+   * @returns {AsyncStorage}
    */
   saveMessages = async () => {
     try {
@@ -232,10 +250,18 @@ export default class Chat extends Component {
   }
 
   /**
-   * Adds newest message
+   * ###### Purpose:
+   * - Adds newest message
    * from 'messages' state to Firestore.
    * @function addMessages
-   * @async
+   * @param {state} messages array
+   * @param {Object} message
+   * @param {string} message._id - message id
+   * @param {string} message.text - message content
+   * @param {date} message.createdAt - DTG message
+   * @param {string} message.image - image
+   * @param {number} message.location - GPS coordinates
+   * @param {boolean} message.sent
    */
   addMessages = () => {
     const { messages } = this.state;
@@ -252,11 +278,14 @@ export default class Chat extends Component {
   };
 
   /**
-   * *For Developer use only*:
-   * Deletes 'messages' key
+   * ###### *For Developer use only*:
+   * >
+   * -  Deletes 'messages' key
    * from local asyncStorage.
-   * @function deleteMessages
    * @async
+   * @function deleteMessages
+   * @param {string} messages
+   * @returns {state} messages
    */
   deleteMessages = async () => {
     try {
@@ -270,12 +299,14 @@ export default class Chat extends Component {
   }
 
   /**
-   * *For Developer use only*:
-   * Clears Firestore and
-   * leaves placeholder message
+   * ###### *For Developer use only*:
+   * >
+   * - Clears Firestore.
+   * - Leaves placeholder message
    * to maintain collection.
-   * @function deleteMessagesFirestore
    * @async
+   * @function deleteMessagesFirestore
+   * @returns {Object} collectionPlaceholder
    */
   deleteMessagesFirestore = async () => {
     const collectionPlaceholder = {
@@ -303,10 +334,13 @@ export default class Chat extends Component {
   };
 
   /**
-   * Adds each new message to
+   * ###### Purpose:
+   * - Adds each new message to
    * preceding messages state;
-   * returns new messages state.
+   * - Returns new messages state.
    * @function onSend
+   * @param {Object[]} messages empty state
+   * @returns {state} GiftedChat
    */
   onSend = (messages = []) => {
     this.setState(
@@ -322,9 +356,11 @@ export default class Chat extends Component {
   }
 
   /**
-   * Enables bespoke styling
-   * to default GiftedChat.
+   * ###### Purpose:
+   * - Enables bespoke styling
+   * of default GiftedChat UI design.
    * @function renderBubble
+   * @param {*} props
    */
   renderBubble = (props) => (
     <Bubble
@@ -341,9 +377,12 @@ export default class Chat extends Component {
   )
 
   /**
-   * Renders input toolbar
+   * ###### Purpose:
+   * - Renders input toolbar
    * only if user is online.
    * @function renderInputToolbar
+   * @param {*} props
+   * @returns {InputToolbar}
    */
   renderInputToolbar = (props) => {
     // eslint-disable-next-line no-empty
@@ -358,17 +397,23 @@ export default class Chat extends Component {
   }
 
   /**
-   * Renders custom actions icon
+   * ###### Purpose:
+   * - Renders custom actions icon
    * & hidden list of user options
    * within input toolbar.
    * @function renderCustomActions
+   * @param {*} props
+   * @returns {CustomActions}
    */
   renderCustomActions = (props) => <CustomActions {...props} />;
 
   /**
-   * Renders a Google map image
+   * ###### Purpose:
+   * - Renders a Google map image
    * to display shared location.
    * @function renderCustomView
+   * @param {*} props
+   * @returns {MapView}
    */
   renderCustomView = (props) => {
     const { currentMessage } = props;
