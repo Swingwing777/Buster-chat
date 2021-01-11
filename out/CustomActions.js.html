@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: CustomActions.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: CustomActions.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View, LogBox } from 'react-native';
+
+import * as ImagePicker from 'expo-image-picker';
+import * as Permissions from 'expo-permissions';
+import * as MediaLibrary from 'expo-media-library';
+import * as Location from 'expo-location';
+import firebase from "firebase";
+
+// Ignore all log notifications:
+LogBox.ignoreAllLogs();
+
+export default class CustomActions extends Component {
+
+  /**
+   * Requests permission to access device media gallery
+   * @function pickImage
+   * @async
+   */
+  pickImage = async () => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+
+      if (status === 'granted') {
+        let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        }).catch(error => console.log(error));
+
+        if (!result.cancelled) {
+          const imageUrl = await this.uploadImageFetch(result.uri);  // Method 1
+          // const imageUrl = await this.uploadImage(result.uri);    // Method 2
+          this.props.onSend({ image: imageUrl });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  /**
+   * Requests permission to use camera; then takes photo.
+   * @function takePhoto
+   * @async
+   * @deprecated CAMERA_ROLL
+   */
+  takePhoto = async () => {
+    try {
+      const { status } = await Permissions.askAsync(
+        Permissions.CAMERA,
+        Permissions.CAMERA_ROLL
+      );
+
+      if (status === "granted") {
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        }).catch((error) => console.log(error));
+
+        if (!result.cancelled) {
+          // const imageUrlLink = await this.uploadImage(result.uri);
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
+        }
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+
+  /** 
+   * Method 1 - upload Gallery or Camera image to
+   * Storage with fetch() and blob().
+   * @function uploadImagefetch
+   * @async
+  */
+  uploadImageFetch = async (uri) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+
+      const getImageName = uri.split("/");       // To split the uri into array of strings
+      const imageFinalString = getImageName[getImageName.length - 1];
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(`images/${imageFinalString}`);
+
+      const snapshot = await ref.put(blob);
+
+      const imageURL = await snapshot.ref.getDownloadURL();
+      return imageURL;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  /**
+   * Method 2 - [Alternative] upload Gallery or 
+   * Camera image to Storage with XMLHttpRequest.
+   * @function uploadImage
+   * @async
+   */
+  uploadImage = async (uri) => {
+    try {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function () {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function (e) {
+          console.log(e);
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', uri, true);
+        xhr.send(null);
+      });
+
+      const getImageName = uri.split("/");         // To split the uri into array of strings
+      const imageFinalString = getImageName[getImageName.length - 1];
+      const ref = firebase
+        .storage()
+        .ref()
+        .child(`images/${imageFinalString}`);
+
+      const snapshot = await ref.put(blob);
+
+      blob.close();
+
+      const imageURL = await snapshot.ref.getDownloadURL();
+      return imageURL;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /**
+   * Request permission to access device location
+   * @function getLocation
+   * @async
+   */
+  getLocation = async () => {
+    try {
+      const { status } = await Permissions.askAsync(Permissions.LOCATION);
+      if (status === 'granted') {
+        let result = await Location.getCurrentPositionAsync({});
+
+        if (result) {
+          this.props.onSend({
+            location: {
+              longitude: result.coords.longitude,
+              latitude: result.coords.latitude,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /**
+   * Renders and reveals custom actions.
+   * @function onActionPress
+   * @async
+   */
+  onActionPress = () => {
+    const options = [
+      'Choose From Library',
+      'Take Picture',
+      'Send Location',
+      'Cancel'
+    ];
+    const cancelButtonIndex = options.length - 1;
+    this.context.actionSheet().showActionSheetWithOptions(
+      {
+        options,
+        cancelButtonIndex,
+      },
+      async (buttonIndex) => {
+        try {
+          switch (buttonIndex) {
+            case 0:
+              // console.log('user wants to pick an image');
+              this.pickImage();
+              return;
+            case 1:
+              // console.log('user wants to take a photo');
+              this.takePhoto();
+              return;
+            case 2:
+              // console.log('user wants to get their location');
+              this.getLocation();
+              return;
+            default:
+          }
+        } catch (error) {
+          console.log(error)
+        }
+      },
+    );
+  };
+
+  render() {
+    return (
+      &lt;TouchableOpacity
+        style={[styles.container]}
+        onPress={this.onActionPress}>
+        &lt;View style={[styles.wrapper, this.props.wrapperStyle]}>
+          &lt;Text
+            style={[styles.iconText, this.props.iconTextStyle]}
+            accessibilityLabel='Message Options'
+            accessibilityRole='menu'
+          >+&lt;/Text>
+        &lt;/View>
+      &lt;/TouchableOpacity>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    width: 26,
+    height: 26,
+    marginLeft: 10,
+    marginBottom: 10,
+  },
+  wrapper: {
+    borderRadius: 13,
+    borderColor: '#b2b2b2',
+    borderWidth: 2,
+    flex: 1,
+  },
+  iconText: {
+    color: '#b2b2b2',
+    fontWeight: 'bold',
+    fontSize: 16,
+    backgroundColor: 'transparent',
+    textAlign: 'center',
+  },
+});
+
+CustomActions.contextTypes = {
+  actionSheet: PropTypes.func,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Chat.html">Chat</a></li></ul><h3>Global</h3><ul><li><a href="global.html#addMessages">addMessages</a></li><li><a href="global.html#componentDidMount">componentDidMount</a></li><li><a href="global.html#componentWillUnmount">componentWillUnmount</a></li><li><a href="global.html#deleteMessages">deleteMessages</a></li><li><a href="global.html#deleteMessagesFirestore">deleteMessagesFirestore</a></li><li><a href="global.html#getLocation">getLocation</a></li><li><a href="global.html#getMessages">getMessages</a></li><li><a href="global.html#onActionPress">onActionPress</a></li><li><a href="global.html#onCollectionUpdate">onCollectionUpdate</a></li><li><a href="global.html#onSend">onSend</a></li><li><a href="global.html#pickImage">pickImage</a></li><li><a href="global.html#renderBubble">renderBubble</a></li><li><a href="global.html#renderCustomActions">renderCustomActions</a></li><li><a href="global.html#renderCustomView">renderCustomView</a></li><li><a href="global.html#renderInputToolbar">renderInputToolbar</a></li><li><a href="global.html#saveMessages">saveMessages</a></li><li><a href="global.html#takePhoto">takePhoto</a></li><li><a href="global.html#uploadImage">uploadImage</a></li><li><a href="global.html#uploadImagefetch">uploadImagefetch</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.6</a> on Sun Jan 10 2021 19:33:41 GMT+0400 (Gulf Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
