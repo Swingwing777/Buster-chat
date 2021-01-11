@@ -1,32 +1,33 @@
-// Chat.js
-
 import React, { Component } from 'react';
-import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat'
-import firebase from "firebase";
-import "firebase/firestore";
+import PropTypes from 'prop-types';
+import { GiftedChat, Bubble, InputToolbar } from 'react-native-gifted-chat';
+import firebase from 'firebase';
+import 'firebase/firestore';
+import 'react-native-get-random-values';
 import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
-import NetInfo from "@react-native-community/netinfo";
-import { Button, Keyboard } from 'react-native';
-import CustomActions from './CustomActions';
-import MapView from 'react-native-maps';
-
+import NetInfo from '@react-native-community/netinfo';
 import {
+  Button, Keyboard,
   KeyboardAvoidingView,
   Platform,
   Alert,
   View,
-  Text
+  Text,
 } from 'react-native';
+import MapView from 'react-native-maps';
+import CustomActions from './CustomActions';
 
+/**
+ * Creates a new Class component
+ * @class Chat
+ */
 export default class Chat extends Component {
   constructor() {
     super();
     this.state = {
       isConnected: false,
-      uid: 0,
       backGround: '#474056',
-      name: '',
       messages: [],
       loggedInText: 'Please wait for authentication',
       user: {
@@ -34,19 +35,17 @@ export default class Chat extends Component {
         name: '',
         avatar: '',
       },
-      image: null,
-      location: null,
     };
 
     const firebaseConfig = {
-      apiKey: "AIzaSyAslhRrYTA1g6UsYGc5XfYFDtOB2HkQD50",
-      authDomain: "test-8c742.firebaseapp.com",
-      projectId: "test-8c742",
-      storageBucket: "test-8c742.appspot.com",
-      messagingSenderId: "26001870209",
-      appId: "1:26001870209:web:81ed424ddc9a29bdc6ec80",
-      measurementId: "G-CEKYF200N3"
-    }
+      apiKey: 'AIzaSyAslhRrYTA1g6UsYGc5XfYFDtOB2HkQD50',
+      authDomain: 'test-8c742.firebaseapp.com',
+      projectId: 'test-8c742',
+      storageBucket: 'test-8c742.appspot.com',
+      messagingSenderId: '26001870209',
+      appId: '1:26001870209:web:81ed424ddc9a29bdc6ec80',
+      measurementId: 'G-CEKYF200N3',
+    };
 
     // Firebase initialization must occur before any Firebase requests
     if (!firebase.apps.length) {
@@ -54,12 +53,26 @@ export default class Chat extends Component {
     }
 
     // Reference to messages collection
-    this.referenceMessages =
-      firebase.firestore().collection('messages');
-  };
+    this.referenceMessages = firebase.firestore().collection('messages');
+  }
 
+  /**
+   * Sets the user choices,
+   * gets the local message store
+   * authenticates the user,
+   * displays system message and
+   * sets initial states.
+   * @function componentDidMount
+   * @state isConnected
+   * @state user
+   * @state loggedInText
+   * @state messages
+   *
+   */
   componentDidMount() {
-    let { name, backGround } = this.props.route.params;
+    const { route, navigation } = this.props;
+    let { name } = route.params;
+    const { backGround } = route.params;
 
     // Default username for title area if user does not enter one
     if (!name || name === '') name = 'User';
@@ -68,12 +81,11 @@ export default class Chat extends Component {
     this.id = uuidv4();
 
     // Displays desired background and username in the navbar
-    this.props.navigation.setOptions({ title: name });
+    navigation.setOptions({ title: name });
 
     this.setState({
-      name: name,
-      backGround: backGround,
-    })
+      backGround,
+    });
 
     // Always want to retrieve chat messages from asyncStorage
     this.getMessages();
@@ -81,7 +93,6 @@ export default class Chat extends Component {
     // Checks if user online
     NetInfo.fetch().then((connection) => {
       if (connection.isConnected) {
-
         // Firebase user authentication
         this.authUnsubscribe = firebase
           .auth()
@@ -99,8 +110,8 @@ export default class Chat extends Component {
               isConnected: true,
               user: {
                 _id: user.uid,
-                name: name,
-                avatar: "https://placeimg.com/140/140/any",
+                name,
+                avatar: 'https://placeimg.com/140/140/any',
               },
 
               // Blank the authentication message
@@ -111,13 +122,13 @@ export default class Chat extends Component {
                   text: `${name} has entered the chat`,
                   createdAt: new Date(),
                   system: true,
-                }
+                },
               ],
             });
 
             this.unsubscribe = this.referenceMessages
               // orderBy ensures correct chronological order
-              .orderBy("createdAt", "desc")
+              .orderBy('createdAt', 'desc')
               .onSnapshot(this.onCollectionUpdate);
           });
       } else {
@@ -126,24 +137,34 @@ export default class Chat extends Component {
           loggedInText: 'Offline',
         });
 
-        // retrieve chat messages from asyncStorage 
+        // retrieve chat messages from asyncStorage
         this.getMessages();
       }
     });
   }
 
+  /**
+   * Unsubscribes from Firestore
+   * and cancels user autherisation.
+   * @function componentWillUnmount
+   */
   componentWillUnmount() {
-    if (this.state.isConnected) {
+    const { isConnected } = this.state;
+    if (isConnected) {
       this.unsubscribe();
       this.authUnsubscribe();
     }
   }
 
-  /** onCollectionUpdate queries the 
-   * Firestore messages collection.
+  /**
+   * Query the Firestore messages collection.
    * Note: arrow syntax binds 'this'
-   * to the parent scope (ie Component), 
-   * rather than to onCollectionUpdate() 
+   * to the parent scope (ie Component),
+   * rather than to onCollectionUpdate()
+   * @function onCollectionUpdate
+   * @param {array} messages
+   * @return {state} messages
+   *
    */
   onCollectionUpdate = (querySnapshot) => {
     const messages = [];
@@ -157,8 +178,8 @@ export default class Chat extends Component {
         text: data.text.toString(),
         createdAt: data.createdAt.toDate(),
         user: data.user,
-        image: data.image || "",
-        location: data.location
+        image: data.image || '',
+        location: data.location,
       });
     });
 
@@ -172,100 +193,120 @@ export default class Chat extends Component {
     }
   };
 
-  /** getMessages retrieves locally
-   * held messages from asyncStorager 
+  /**
+   * Retrieves locally
+   * held messages from asyncStorager
    * for offline viewing.
+   * @function getMessages
+   * @async
    */
   getMessages = async () => {
     let messages = '';
     try {
       messages = await AsyncStorage.getItem('messages') || [];
       this.setState({
-        messages: JSON.parse(messages)
+        messages: JSON.parse(messages),
       });
     } catch (error) {
       console.log(error.message);
     }
   };
 
-  /** saveMessages saves the 'messages'
+  /**
+   * Saves the 'messages'
    * state to local asyncStorage.
+   * @function saveMessages
+   * @async
    */
   saveMessages = async () => {
     try {
+      const { messages } = this.state;
       await AsyncStorage
         .setItem(
           'messages',
-          JSON.stringify(this.state.messages)
+          JSON.stringify(messages),
         );
     } catch (error) {
       console.log(error.message);
     }
   }
 
-  /** addMessages adds newest message
- * from 'messages' state to Firestore.
- */
+  /**
+   * Adds newest message
+   * from 'messages' state to Firestore.
+   * @function addMessages
+   * @async
+   */
   addMessages = () => {
-    const message = this.state.messages[0];
+    const { messages } = this.state;
+    const message = messages[0];
     this.referenceMessages.add({
       _id: message._id,
-      text: message.text || "",
+      text: message.text || '',
       createdAt: message.createdAt,
       user: message.user,
-      image: message.image || "",
+      image: message.image || '',
       location: message.location || null,
       sent: true,
     });
   };
 
-  /** For Developer use - deletes the
-   * 'messages' key from local Storage.
+  /**
+   * *For Developer use only*:
+   * Deletes 'messages' key
+   * from local asyncStorage.
+   * @function deleteMessages
+   * @async
    */
   deleteMessages = async () => {
     try {
       await AsyncStorage.removeItem('messages');
       this.setState({
-        messages: []
-      })
+        messages: [],
+      });
     } catch (error) {
       console.log(error.message);
     }
   }
 
-  /** For Developer use - Clears Firestore
-   * and leaves placeholder message
+  /**
+   * *For Developer use only*:
+   * Clears Firestore and
+   * leaves placeholder message
    * to maintain collection.
+   * @function deleteMessagesFirestore
+   * @async
    */
   deleteMessagesFirestore = async () => {
-    collectionPlaceholder =
-    {
+    const collectionPlaceholder = {
       _id: 1,
       text: 'Hello',
       createdAt: new Date(),
       user: {
         _id: 1,
         name: 'Creator',
-        avatar: "https://sweepback.co.uk/img/creator.jpg",
+        avatar: 'https://sweepback.co.uk/img/creator.jpg',
       },
       sent: true,
-    }
+    };
     try {
       this.referenceMessages.get()
-        .then(res => {
-          res.forEach(doc => {
+        .then((res) => {
+          res.forEach((doc) => {
             doc.ref.delete();
-          })
+          });
           this.referenceMessages.add(collectionPlaceholder);
-        })
+        });
     } catch (error) {
       console.log(error);
     }
   };
 
-  /** onSend adds each new message to preceding
-   * messages state and returns new messages state, 
-   * triggering re-render.
+  /**
+   * Adds each new message to
+   * preceding messages state;
+   * returns new messages state.
+   * @function onSend
    */
   onSend = (messages = []) => {
     this.setState(
@@ -276,33 +317,37 @@ export default class Chat extends Component {
         this.addMessages();
         this.saveMessages();
         Keyboard.dismiss();
-      }
+      },
     );
   }
 
-  /** renderBubble enables bespoke styling
-   *  to adjust default GiftedChat styling
+  /**
+   * Enables bespoke styling
+   * to default GiftedChat.
+   * @function renderBubble
    */
-  renderBubble = (props) => {
-    return (
-      <Bubble
-        {...props}
-        wrapperStyle={{
-          left: {
-            backgroundColor: '#bdbdbd',   // Grey
-          },
-          right: {
-            backgroundColor: '#081721'    // Midnight blue
-          }
-        }} />
-    )
-  }
+  renderBubble = (props) => (
+    <Bubble
+      {...props}
+      wrapperStyle={{
+        left: {
+          backgroundColor: '#bdbdbd', // Grey
+        },
+        right: {
+          backgroundColor: '#081721', // Midnight blue
+        },
+      }}
+    />
+  )
 
-  /** renderInputToolbar renders the
-   * input toolbar only if the user is online
+  /**
+   * Renders input toolbar
+   * only if user is online.
+   * @function renderInputToolbar
    */
   renderInputToolbar = (props) => {
-    if (props.isConnected == false) {
+    // eslint-disable-next-line no-empty
+    if (props.isConnected === false) {
     } else {
       return (
         <InputToolbar
@@ -312,16 +357,18 @@ export default class Chat extends Component {
     }
   }
 
-  /** renderCustomActions renders the
-   * custom actions icon & hidden list
-   * of user options within input toolbar
+  /**
+   * Renders custom actions icon
+   * & hidden list of user options
+   * within input toolbar.
+   * @function renderCustomActions
    */
-  renderCustomActions = (props) => {
-    return <CustomActions {...props} />;
-  };
+  renderCustomActions = (props) => <CustomActions {...props} />;
 
-  /** renderCustomView renders a Google map image
+  /**
+   * Renders a Google map image
    * to display shared location.
+   * @function renderCustomView
    */
   renderCustomView = (props) => {
     const { currentMessage } = props;
@@ -331,8 +378,8 @@ export default class Chat extends Component {
           style={{
             width: 150,
             height: 100,
-            borderRadius: 13,
-            margin: 3
+            borderRadius: 20,
+            margin: 3,
           }}
           region={{
             latitude: currentMessage.location.latitude,
@@ -347,15 +394,20 @@ export default class Chat extends Component {
   }
 
   render() {
-    let { backGround } = this.state;
-    let { loggedInText } = this.state;
+    const {
+      backGround,
+      loggedInText,
+      messages,
+      isConnected,
+      user,
+    } = this.state;
     return (
 
       <View
         style={{
           // flex: 1 essential to fill all available space
           flex: 1,
-          backgroundColor: backGround
+          backgroundColor: backGround,
         }}
       >
         <Text>{loggedInText}</Text>
@@ -363,12 +415,12 @@ export default class Chat extends Component {
         {/* GiftedChat renders chat progress */}
         <GiftedChat
           renderBubble={this.renderBubble}
-          isConnected={this.state.isConnected}
+          isConnected={isConnected}
           renderInputToolbar={this.renderInputToolbar}
-          messages={this.state.messages}
-          onSend={messages => this.onSend(messages)}
-          user={this.state.user}
-          renderUsernameOnMessage={true}
+          messages={messages}
+          onSend={(message) => this.onSend(message)}
+          user={user}
+          renderUsernameOnMessage
           renderActions={this.renderCustomActions}
           renderCustomView={this.renderCustomView}
         />
@@ -376,18 +428,30 @@ export default class Chat extends Component {
         {/* Cures Android keyboard overlap issue */}
         { Platform.OS === 'android'
           ? <KeyboardAvoidingView behavior="height" />
-          : null
-        }
+          : null}
 
         {/* Development use only - comment out block for production */}
         <Button
-          title='Dev Use: Delete Local/Remote'
-          accessibilityLabel='Developer delete messages'
+          title="Dev Use: Delete Local/Remote"
+          accessibilityLabel="Developer delete messages"
           onPress={() => {
-            this.deleteMessages()
-            this.deleteMessagesFirestore()
-          }} />
+            this.deleteMessages();
+            this.deleteMessagesFirestore();
+          }}
+        />
       </View>
-    )
+    );
   }
 }
+
+Chat.propTypes = {
+  route: PropTypes.shape({
+    params: PropTypes.shape({
+      backGround: PropTypes.string,
+      name: PropTypes.string,
+    }),
+  }).isRequired,
+  navigation: PropTypes.shape({
+    setOptions: PropTypes.func,
+  }).isRequired,
+};
