@@ -165,9 +165,10 @@ export default class Chat extends Component {
   /**
    * ###### Purpose:
    * - Query the Firestore messages collection.
-   * - *Note*: arrow syntax binds 'this'
-   * to the parent scope (ie Component),
-   * rather than to onCollectionUpdate()
+   * - Updates messages state.
+   * // *Note*: arrow syntax binds 'this'
+   * // to the parent scope (ie Component),
+   * // rather than to onCollectionUpdate()
    * @function onCollectionUpdate
    * @param {Object[]} messages collection
    * @param {string} messages[]._id - message id
@@ -176,7 +177,7 @@ export default class Chat extends Component {
    * @param {string} messages[].user - user data
    * @param {string} messages[].image - image sent
    * @param {number} messages[].location - GPS coordinates
-   * @returns {state} messages
+   * @returns {Promise<string>} Set messages state
    */
   onCollectionUpdate = (querySnapshot) => {
     const messages = [];
@@ -213,7 +214,8 @@ export default class Chat extends Component {
    * @async
    * @function getMessages
    * @params {string} messages
-   * @returns {state} messages
+   * @returns {Promise<string>}
+   * @returns messages from local storage
    */
   getMessages = async () => {
     let messages = '';
