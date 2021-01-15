@@ -8,6 +8,7 @@ import { v4 as uuidv4 } from 'uuid';
 import AsyncStorage from '@react-native-community/async-storage';
 import NetInfo from '@react-native-community/netinfo';
 import {
+  // eslint-disable-next-line no-unused-vars
   Button, Keyboard,
   KeyboardAvoidingView,
   Platform,
