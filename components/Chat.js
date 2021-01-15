@@ -15,7 +15,7 @@ import {
   View,
   Text,
 } from 'react-native';
-import MapView from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import CustomActions from './CustomActions';
 
 /**
@@ -424,18 +424,18 @@ export default class Chat extends Component {
         <View style={{
           alignSelf: 'center',
           top: 5,
+          bottom: 10,
           width: '90%',
-          // height: 200,
-          borderRadius: 10,
+          borderRadius: 15,
           overflow: 'hidden',
         }}
         >
           <MapView
             style={{
-              width: 150,
-              height: 100,
-              borderRadius: 20,
-              margin: 3,
+              width: 160,
+              height: 110,
+              borderRadius: 15,
+              marginBottom: 4,
             }}
             region={{
               latitude: currentMessage.location.latitude,
@@ -447,7 +447,18 @@ export default class Chat extends Component {
               latitude: currentMessage.location.latitude,
               longitude: currentMessage.location.longitude,
             }}
-          />
+          >
+            <Marker
+              coordinate={{
+                latitude: currentMessage.location.latitude,
+                longitude: currentMessage.location.longitude,
+                latitudeDelta: 0.01,
+                longitudeDelta: 0.01,
+              }}
+              pinColor="red"
+              title="Here I am"
+            />
+          </MapView>
         </View>
       );
     }
@@ -492,14 +503,14 @@ export default class Chat extends Component {
           : null}
 
         {/* Development use only - comment out block for production */}
-        <Button
+        {/* <Button
           title="Dev Use: Delete Local/Remote"
           accessibilityLabel="Developer delete messages"
           onPress={() => {
             this.deleteMessages();
             this.deleteMessagesFirestore();
           }}
-        />
+        /> */}
       </View>
     );
   }
