@@ -421,20 +421,34 @@ export default class Chat extends Component {
     const { currentMessage } = props;
     if (currentMessage.location) {
       return (
-        <MapView
-          style={{
-            width: 150,
-            height: 100,
-            borderRadius: 20,
-            margin: 3,
-          }}
-          region={{
-            latitude: currentMessage.location.latitude,
-            longitude: currentMessage.location.longitude,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-        />
+        <View style={{
+          alignSelf: 'center',
+          top: 5,
+          width: '90%',
+          // height: 200,
+          borderRadius: 10,
+          overflow: 'hidden',
+        }}
+        >
+          <MapView
+            style={{
+              width: 150,
+              height: 100,
+              borderRadius: 20,
+              margin: 3,
+            }}
+            region={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            annotations={{
+              latitude: currentMessage.location.latitude,
+              longitude: currentMessage.location.longitude,
+            }}
+          />
+        </View>
       );
     }
     return null;
