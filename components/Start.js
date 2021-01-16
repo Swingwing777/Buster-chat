@@ -146,7 +146,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#FFFFFF',
     justifyContent: 'flex-start',
-
   },
   boxWrapper: {
     // flex: 1,
