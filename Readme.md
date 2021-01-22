@@ -3,7 +3,7 @@
 
 Buster-chat is a React-Native based, screenreader compatible messaging app, allowing users to pass messages as well as share camera and gallery images and GPS location.  Messages and images are stored in Google Firebase and Cloud Firestore.
 
-![Screenshot_Start200.png](https://www.dropbox.com/s/siwz9aggjj8758c/Screenshot_Start200.png?dl=0&raw=1)![Screenshot_Chat200.png](https://www.dropbox.com/s/mmjf9cn7g0ui1fn/Screenshot_Chat200.png?dl=0&raw=1)
+![Screenshot_Start200.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Screenshot_Start200.png)![Screenshot_Chat200.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Screenshot_Chat200.png?dl=0)
 > Note: Screenshots from Android Emulator.  iOS similar though not identical due to native UI rendering.
 
 ### Tech:
@@ -49,7 +49,7 @@ $ expo init <myChoiceOfName>
 * This creates the barebones React-Native app:
 * Now **copy-paste** the repository files into the App, to achieve a folder layout as follows:
 
-![DirectoryStructure200.png](https://www.dropbox.com/s/3mx10rusc4ra4ht/DirectoryStructure200.png?dl=0&raw=1)
+![DirectoryStructure200.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/DirectoryStructure200.png?dl=0&raw=1)
 
 Then, from within the project's root directory, type: 
 ```sh
@@ -74,10 +74,10 @@ You will need your own Google Firebase account for storage of both messages and 
 * Once your account is setup, open your Firebase Console and select an existing project or create a new one.
 * In the left side menu, select **Project Overview** --> **Project Settings**.
 * Under the **General** tab, click **Firestore for Web** or the **'</>'** icon.  On the next screen, select **Register App**.  Beneath it appears a fully-populated code window: Copy and save `var firebaseConfig = { ... }`.  This code must be added to the `Chat.js` file within the `constructor()`.
-![Firestore2.png](https://www.dropbox.com/s/j4314vr51hqq6n8/Firestore2.png?dl=0&raw=1)
+![Firestore2.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Firestore2.png?dl=0&raw=1)
 
 * Now select Cloud Firstore in the left side menu and start and name a new collection:
-![Firestore3.png](https://www.dropbox.com/s/m65cltucu3lmfkz/Firestore3.png?dl=0&raw=1)
+![Firestore3.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Firestore3.png?dl=0&raw=1)
 
 * As a minimum, a collection **must** contain one document, or else it is automatically deleted.
 * A reference to the collection is then added to the `componentDidMount` method of `Chat.js`:
@@ -115,18 +115,18 @@ The following installation steps require attention:
 * After installation, start Android Studio, and select **Configure** --> **SDK Manager** --> **SDK Tools** --> Ensure that **Android SDK Build-Tools** shows as installed, or else click to install. 
 * Restart Android Studio and select **Configure** --> **AVD Manager** --> **+ Create Virtual Device** --> Note: For ease of later testing, pick a profile that includes Google Play Store.
 * Follow the steps through to create the virtual device, including acceptance of the License Agreement.  Once completed, return to the Virtual Device Manager via **Configure** --> **AVD** and click the Play symbol to start your new virtual device.
-![Virtual_Device-Android.png](https://www.dropbox.com/s/j8sb8x9vbf6pbqj/Virtual_Device-Android.png?dl=0&raw=1)     
+![Virtual_Device-Android.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Virtual_Device-Android.png?dl=0&raw=1)     
 * The virtual device will require the installation of the Expo App from [Google Play], just as for a real device.  Then select **Run on Android device/emulator** in the Expo browser window.
 * Thereafter, for running with Expo on your PC or Mac, or any troubleshooting, refer to the [Expo] website.  
 
-![Android_Metro.jpg](https://www.dropbox.com/s/jzwe4ww5kdqri5z/Android_Metro.jpg?dl=0&raw=1)
+![Android_Metro.jpg](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Android_Metro.jpg?dl=0&raw=1)
 
 ##### Testing | iOS Simulator:
 Testing on an iOS simulator is available on Mac OS only, using [XCode] which is a developer tool available through the Mac App Store.
 * Once installed on your Mac, select **Preferences** --> **Components**, and then select and install a simulator from the dsipalyed list.
 * To run, start the Expo project in your terminal and once the Metro Bundler starts in the browser, select **Run on iSO simulator**.
 
-![iOS_Metro.jpg](https://www.dropbox.com/s/r0jqwhf0l3iep5d/iOS_Metro.jpg?dl=0&raw=1)
+![iOS_Metro.jpg](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/iOS_Metro.jpg?dl=0&raw=1)
 
 ----
 ### Todos
