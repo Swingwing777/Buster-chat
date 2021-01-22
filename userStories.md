@@ -23,7 +23,7 @@ Serverless function required (including any necessary registration if function).
 Work intensive.
 
 #### Wire Frames - Story 1 | Initial Concept:
-![story1.png](https://www.dropbox.com/s/3s1y2oj4dkvkoni/story1.png?dl=0&raw=1) 
+![story1.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/story1.png?dl=0&raw=1) 
 
 ## Story 2:
 As a user, I want to be able to send messages to my friends and family members to exchange the latest news.
@@ -45,7 +45,7 @@ E.	Local storage required so that previous chart dialogue always displayed.
 A number of separate tasks - with overlap between story 1 and story 2.	 
 
 #### Wire Frames - Story 2 | Initial Concept:
-![story2.png](https://www.dropbox.com/s/2mfzr5zdn4nf3h6/story2.png?dl=0&raw=1)
+![story2.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/story2.png?dl=0&raw=1)
 
 ## Story 3:
 As a user, I want to send images to my friends to show them what I am currently doing.
@@ -65,7 +65,7 @@ D.	Notification.
 Not entirely sure without more complete Native knowledge.  Difficulty points entirely reliant on React-Native integration capabilities with device OS's.
 
 #### Wire Frames - Story 3 | Initial Concept:
-![story3.png](https://www.dropbox.com/s/3afwh25pnbm09gu/story3.png?dl=0&raw=1)
+![story3.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/story3.png?dl=0&raw=1)
 
 ## Story 4:
 As a user, I want to share my location with my friends to show them where I am.
@@ -79,7 +79,7 @@ A.	Integrate and authorise device location with app (existing device functionali
 Not entirely sure without more complete Native knowledge.  However, single function/purpose using existing device functionality.
 
 #### Wire Frames - Story 4 | Initial Concept:
-![story4.png](https://www.dropbox.com/s/tiavqknfn6o9bky/story4.png?dl=0&raw=1)
+![story4.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/story4.png?dl=0&raw=1)
 
 ## Story 5:
 As a user, I want to be able to read my messages offline so I can reread conversations at any time.

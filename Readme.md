@@ -63,7 +63,7 @@ $ expo start
 ```
 * Alternatively, type `npm start`.  
 * Either command starts the Metro Bundler in the default browser.
-![Metro Bundler.png](https://www.dropbox.com/s/20awuv3dm6rum9m/Metro%20Bundler.png?dl=0&raw=1)
+![Metro Bundler.png](https://sweepback.co.uk/supportfiles/Readme%20Support%20Media%20-%20for%20Sweepback/Metro%20Bundler.png?dl=0&raw=1)
 ----
 
 ### Storage: 
