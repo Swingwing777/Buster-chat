@@ -55,7 +55,7 @@ Then, from within the project's root directory, type:
 ```sh
 $ expo install 
 ```
-* This ensures any remaining depencies detailed in `package.json` are inbstalled as Expo compatible versions.
+* This ensures any remaining depencies detailed in `package.json` are installed as Expo compatible versions.
 >
 Finally, type:
 ```sh
